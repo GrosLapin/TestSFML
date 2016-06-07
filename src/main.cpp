@@ -15,14 +15,14 @@ int main()
     std::cout << is_point<lapin>::value << std::endl;
 
     std::vector<sf::Vector2f> points = { {0,0} , {150,10} , {120,90}  , {30,100} , {0,50}};
-    sf::ConvexShape convex = createPolygone(points);
+ 
 
+	std::vector<sf::ConvexShape> poly;
+	poly.emplace_back(createPolygone(points));
+	poly.emplace_back(createPolygone({ {100,100} , {250,110} , {220,190}  , {130,200} , {100,150}}));
 
-    /*std::vector<lapin> pointLapin = { {100,100} , {250,110} , {220,190}  , {130,200} , {100,150}};
-    sf::ConvexShape convex2 = createPolygone(pointLapin);*/
-
-
-	sf::ConvexShape convex2 = createPolygone({ {100,100} , {250,110} , {220,190}  , {130,200} , {100,150}});
+     points.clear();
+ 
     while (window.isOpen())
     {
         sf::Event event;
@@ -30,11 +30,30 @@ int main()
         {
             if (event.type == sf::Event::Closed)
                 window.close();
+			
+			if ((event.type == sf::Event::MouseButtonPressed) && (event.mouseButton.button == sf::Mouse::Left))
+            {
+				std::cout << " x : " << event.mouseButton.x << " y : " <<   event.mouseButton.y  << std::endl;
+				std::cout << "abs :" << sf::Mouse::getPosition() << std::endl;
+				std::cout << "relatif : " <<  sf::Mouse::getPosition(window) << std::endl;
+				points.emplace_back(sf::Mouse::getPosition(window));
+            }
+            
+            if ( event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Return )
+			{
+			
+				std::cout << "entrer" << std::endl;
+				poly.emplace_back(createPolygone(points));
+				points.clear();
+			}
         }
 
         window.clear();
-        window.draw(convex);
-        window.draw(convex2);
+		for (const auto& convex : poly) 
+		{
+			window.draw(convex);
+		}
+
         window.display();
     }
 
