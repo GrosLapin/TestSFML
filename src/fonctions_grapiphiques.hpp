@@ -3,7 +3,9 @@
 
 #include <utility>
 #include <iostream>
+#include <vector>
 #include <SFML/Graphics.hpp>
+#include <typeinfo>
 
 template<class T>
 struct void_if_valide {
@@ -86,9 +88,11 @@ std::ostream& operator<< (std::ostream& out, const Point& p)
     return out;
 }
 
-template<class Conteneur>
+template<class Conteneur = std::vector<sf::Vector2f> >
 sf::ConvexShape createPolygone (Conteneur && points)
 {
+	std::cout << typeid(points).name() << std::endl;
+	std::cout << typeid(points[0]).name ()<< std::endl;
     sf::ConvexShape convex;
     std::cout << points.size() << std::endl;
     convex.setPointCount(points.size());

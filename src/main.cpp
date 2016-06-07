@@ -18,11 +18,11 @@ int main()
     sf::ConvexShape convex = createPolygone(points);
 
 
-    std::vector<lapin> pointLapin = { {100,100} , {250,110} , {220,190}  , {130,200} , {100,150}};
-    sf::ConvexShape convex2 = createPolygone(pointLapin);
+    /*std::vector<lapin> pointLapin = { {100,100} , {250,110} , {220,190}  , {130,200} , {100,150}};
+    sf::ConvexShape convex2 = createPolygone(pointLapin);*/
 
 
-
+	sf::ConvexShape convex2 = createPolygone({ {100,100} , {250,110} , {220,190}  , {130,200} , {100,150}});
     while (window.isOpen())
     {
         sf::Event event;
