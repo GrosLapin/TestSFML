@@ -1,5 +1,8 @@
+exe
+
 **.depend
 bin/**
 build/**
 obj/**
 **.layout
+**.out
