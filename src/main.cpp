@@ -8,7 +8,7 @@
 using namespace testSFML;
 int main()
 {
-     normal s(0,2); // (default mean = zero, and standard deviation = unity)
+     normal s(0,1.5); // (default mean = zero, and standard deviation = unity)
 
 
     const int taille = 500;
@@ -76,9 +76,9 @@ int main()
 				poly.emplace_back(createPolygone(points));
 				points.clear();
 				cercles.emplace_back(2);
-				cercles.back().setPosition(random_point(centres,{0,0},{taille,taille},10));
+				cercles.back().setPosition(random_point(centres,{0,0},{taille,taille},20));
 
-				centres.push_back({cercles.back().getPosition(),s,30});
+				centres.push_back({cercles.back().getPosition(),s,10});
 
 
 

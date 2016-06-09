@@ -92,6 +92,18 @@ namespace testSFML {
         }
     };
 
+    template <  class conteneur ,
+                class Point = sf::Vector2f,
+                class X = typename std::enable_if< is_point<Point>::value >::type>
+    double sumValue (const Point& p , const conteneur& cont_centre_influence )
+    {
+        double value = 0;
+        for (const auto & centre : cont_centre_influence )
+        {
+            value += centre.getValue(p);
+        }
+        return value;
+    }
 
     // il faudrait que je regarde comment m'assurer que c'est bien un conteneur de centre_influence
     template <  class conteneur ,
@@ -111,16 +123,11 @@ namespace testSFML {
             // on prend un point au piff dans l'interval
             PointRetour new_point = random_point(p1,p2);
 
-            for (const auto & centre : cont_centre_influence )
+            double value = sumValue(new_point,cont_centre_influence);
+            if (value > max_value)
             {
-
-                auto value = centre.getValue(new_point);
-
-                if (value > max_value)
-                {
-                    max_value = value;
-                    retour = new_point;
-                }
+                max_value = value;
+                retour = new_point;
             }
         }
         return retour;
