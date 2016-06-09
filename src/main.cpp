@@ -8,9 +8,7 @@
 using namespace testSFML;
 int main()
 {
-
-
-     normal s; // (default mean = zero, and standard deviation = unity)
+     normal s(0,2); // (default mean = zero, and standard deviation = unity)
 
 
     const int taille = 500;
@@ -31,8 +29,24 @@ int main()
 
      points.clear();
 
-    sf::CircleShape circle(10);
-    circle.setPosition({100,100});
+
+    std::vector <sf::CircleShape> cercles;
+
+
+    std::vector<centre_influence<sf::Vector2f> > centres;
+    centre_influence<sf::Vector2f> test;
+    test.centre = sf::Vector2f(100,100);
+    test.repartition = s;
+    centres.push_back(test);
+
+    centre_influence<sf::Vector2f> test2 = {sf::Vector2f(10,10),s};
+    centres.push_back({sf::Vector2f(10,10),s});
+    centres.push_back({sf::Vector2f(10,200),s});
+    // Pourquoi ça marche pas ?
+    // centres.emplace_back(sf::Vector2f(10,200),s);
+
+
+      // centres.emplace_back();
 
 
     while (window.isOpen())
@@ -50,9 +64,9 @@ int main()
 				std::cout << "relatif : " <<  sf::Mouse::getPosition(window) << std::endl;*/
 				points.emplace_back(sf::Mouse::getPosition(window));
 
-                double dist =  distance(circle.getPosition(),sf::Mouse::getPosition(window) ) ;
+               /* double dist =  distance(cercles.front().getPosition(),sf::Mouse::getPosition(window) ) ;
                 std::cout << "distance : " <<dist << std::endl;
-				std::cout << getGaussianValue(s,dist/100) << std::endl;
+				std::cout << getGaussianValue(s,dist/100) << std::endl;*/
             }
 
             if ( event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Return )
@@ -61,6 +75,10 @@ int main()
 				std::cout << "entrer" << std::endl;
 				poly.emplace_back(createPolygone(points));
 				points.clear();
+				cercles.emplace_back(2);
+				cercles.back().setPosition(random_point(centres,{0,0},{taille,taille},20));
+
+
 
 
 			}
@@ -72,7 +90,10 @@ int main()
 			window.draw(convex);
 		}*/
 
-		window.draw(circle);
+        for (const auto& circle : cercles)
+        {
+            window.draw(circle);
+        }
 
         window.display();
     }
