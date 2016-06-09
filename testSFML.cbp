@@ -38,7 +38,9 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="src/fonctions_grapiphiques.hpp" />
+		<Unit filename="src/fonctions_math.hpp" />
 		<Unit filename="src/main.cpp" />
+		<Unit filename="src/traits.hpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

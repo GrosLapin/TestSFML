@@ -79,6 +79,17 @@ namespace testSFML {
     {
         Point centre;
         normal repartition;
+        double max_value = 100 ;
+
+        template <  class Point2 = sf::Vector2f,
+                    class WW = typename std::enable_if< is_point<Point2>::value >::type>
+        double getValue(const Point2 & pt) const
+        {
+            // la division par 100 est du que je réduit 100 pixel à "1" unité pour la gaussien,
+            // revois ça apres
+            auto max = getGaussianValue(repartition,0);
+            return max_value * getGaussianValue(repartition,distance(centre,pt) / 100 ) / max ;
+        }
     };
 
 
@@ -102,9 +113,8 @@ namespace testSFML {
 
             for (const auto & centre : cont_centre_influence )
             {
-                // la division par 100 est du que je réduit 100 pixel à "1" unité pour la gaussien,
-                // revois ça apres
-                auto value = getGaussianValue (centre.repartition, distance(centre.centre,new_point) /100 );
+
+                auto value = centre.getValue(new_point);
 
                 if (value > max_value)
                 {

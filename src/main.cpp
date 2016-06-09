@@ -39,7 +39,7 @@ int main()
     test.repartition = s;
     centres.push_back(test);
 
-    centre_influence<sf::Vector2f> test2 = {sf::Vector2f(10,10),s};
+
     centres.push_back({sf::Vector2f(10,10),s});
     centres.push_back({sf::Vector2f(10,200),s});
     // Pourquoi ça marche pas ?
@@ -76,7 +76,9 @@ int main()
 				poly.emplace_back(createPolygone(points));
 				points.clear();
 				cercles.emplace_back(2);
-				cercles.back().setPosition(random_point(centres,{0,0},{taille,taille},20));
+				cercles.back().setPosition(random_point(centres,{0,0},{taille,taille},10));
+
+				centres.push_back({cercles.back().getPosition(),s,30});
 
 
 
