@@ -67,13 +67,14 @@ int main()
 				/*std::cout << " x : " << event.mouseButton.x << " y : " <<   event.mouseButton.y  << std::endl;
 				std::cout << "abs :" << sf::Mouse::getPosition() << std::endl;
 				std::cout << "relatif : " <<  sf::Mouse::getPosition(window) << std::endl;*/
-				points.emplace_back(sf::Mouse::getPosition(window));
+				auto mousePos = convert_to<sf::Vector2f> ( sf::Mouse::getPosition(window) );
+				points.emplace_back(mousePos);
 
                /* double dist =  distance(cercles.front().getPosition(),sf::Mouse::getPosition(window) ) ;
                 std::cout << "distance : " <<dist << std::endl;
 				std::cout << getGaussianValue(s,dist/100) << std::endl;*/
 			   
-			    double value = sum_valule(sf::Mouse::getPosition(window),centres);
+			    double value = sum_valule(mousePos,centres);
 				double coef_total = sum_coef (centres);
 			
 				std::cout << "le coef total est : " << coef_total << " ; la valeur du point est : " << value << " le ratio est : " << value/coef_total << std::endl;
