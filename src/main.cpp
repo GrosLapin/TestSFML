@@ -8,7 +8,7 @@
 using namespace testSFML;
 int main()
 {
-     normal s(0,1.5); // (default mean = zero, and standard deviation = unity)
+     normal s(0,1); // (default mean = zero, and standard deviation = unity)
 
 
     const int taille = 500;
@@ -41,13 +41,18 @@ int main()
 
 
     centres.push_back({sf::Vector2f(10,10),s});
-    centres.push_back({sf::Vector2f(10,200),s});
+    centres.push_back({sf::Vector2f(200,200),s});
     // Pourquoi ça marche pas ?
     // centres.emplace_back(sf::Vector2f(10,200),s);
 
 
       // centres.emplace_back();
 
+	for (const auto& centre : centres )
+	{
+			cercles.emplace_back(5);
+			cercles.back().setPosition(centre.centre);
+	}
 
     while (window.isOpen())
     {
@@ -67,6 +72,12 @@ int main()
                /* double dist =  distance(cercles.front().getPosition(),sf::Mouse::getPosition(window) ) ;
                 std::cout << "distance : " <<dist << std::endl;
 				std::cout << getGaussianValue(s,dist/100) << std::endl;*/
+			   
+			    double value = sum_valule(sf::Mouse::getPosition(window),centres);
+				double coef_total = sum_coef (centres);
+			
+				std::cout << "le coef total est : " << coef_total << " ; la valeur du point est : " << value << " le ratio est : " << value/coef_total << std::endl;
+				
             }
 
             if ( event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Return )
@@ -76,9 +87,9 @@ int main()
 				poly.emplace_back(createPolygone(points));
 				points.clear();
 				cercles.emplace_back(2);
-				cercles.back().setPosition(random_point(centres,{0,0},{taille,taille},20));
+				cercles.back().setPosition(random_point(centres,{0,0},{taille,taille}));
 
-				centres.push_back({cercles.back().getPosition(),s,10});
+				centres.push_back({cercles.back().getPosition(),s,0.25});
 
 
 

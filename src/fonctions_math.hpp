@@ -79,7 +79,7 @@ namespace testSFML {
     {
         Point centre;
         normal repartition;
-        double max_value = 100 ;
+        double coef = 100 ;
 
         template <  class Point2 = sf::Vector2f,
                     class WW = typename std::enable_if< is_point<Point2>::value >::type>
@@ -87,24 +87,44 @@ namespace testSFML {
         {
             // la division par 100 est du que je réduit 100 pixel à "1" unité pour la gaussien,
             // revois ça apres
-            auto max = getGaussianValue(repartition,0);
-            return max_value * getGaussianValue(repartition,distance(centre,pt) / 100 ) / max ;
+           /* auto max = getGaussianValue(repartition,0);
+            return max_value * getGaussianValue(repartition,distance(centre,pt) / 100 ) / max ;*/
+		   
+		    return coef * getGaussianValue(repartition,distance(centre,pt) / 100 ) ;
+		   
         }
     };
 
+	
+	// Il faudrait surement que je refonte ça, ça ressemble a un algo de la std !
     template <  class conteneur ,
                 class Point = sf::Vector2f,
                 class X = typename std::enable_if< is_point<Point>::value >::type>
-    double sumValue (const Point& p , const conteneur& cont_centre_influence )
+    double sum_valule (const Point& p , const conteneur& cont_centre_influence )
+    {
+        double value = 0;
+		std::cout << "je calcul la somme de " ;
+        for (const auto & centre : cont_centre_influence )
+        {
+            value += centre.getValue(p);
+			std::cout << value << " ";
+        }
+        std::cout << std::endl;
+        return value;
+    }
+    
+	template <  class conteneur >
+    double sum_coef( const conteneur& cont_centre_influence )
     {
         double value = 0;
         for (const auto & centre : cont_centre_influence )
         {
-            value += centre.getValue(p);
+            value += centre.coef;
         }
         return value;
     }
 
+    /// VERSION NAZE, il FAUT un param de trop !!
     // il faudrait que je regarde comment m'assurer que c'est bien un conteneur de centre_influence
     template <  class conteneur ,
                 class PointRetour = sf::Vector2f,
@@ -113,7 +133,7 @@ namespace testSFML {
                 class V = typename std::enable_if< is_point<PointRetour>::value >::type,
                 class W = typename std::enable_if< is_point<Point1>::value >::type,
                 class X = typename std::enable_if< is_point<Point2>::value >::type>
-    PointRetour random_point (const conteneur& cont_centre_influence, const Point1& p1,const Point2& p2, size_t nb_try = 30 )
+    PointRetour random_point (const conteneur& cont_centre_influence, const Point1& p1,const Point2& p2, size_t nb_try)
     {
         // nb try + ecrat type de la gaussienne sont a modifier en couple
         PointRetour retour;
@@ -123,12 +143,48 @@ namespace testSFML {
             // on prend un point au piff dans l'interval
             PointRetour new_point = random_point(p1,p2);
 
-            double value = sumValue(new_point,cont_centre_influence);
+            double value = sum_valule(new_point,cont_centre_influence);
             if (value > max_value)
             {
                 max_value = value;
                 retour = new_point;
             }
+        }
+        return retour;
+    }
+    
+    
+    // tentative de faire mieux :)
+	template <  class conteneur ,
+                class PointRetour = sf::Vector2f,
+                class Point1 = sf::Vector2f,
+                class Point2 = sf::Vector2f,
+                class V = typename std::enable_if< is_point<PointRetour>::value >::type,
+                class W = typename std::enable_if< is_point<Point1>::value >::type,
+                class X = typename std::enable_if< is_point<Point2>::value >::type>
+    PointRetour random_point (const conteneur& cont_centre_influence, const Point1& p1,const Point2& p2)
+    {
+        // nb try + ecrat type de la gaussienne sont a modifier en couple
+        PointRetour retour;
+        double max_value = -1 ;
+		
+		std::random_device rd;
+        std::mt19937 mt(rd());
+        std::uniform_real_distribution<double> linear_rand (0,1);
+		bool fini = false;
+        while (!fini)
+        {
+            // on prend un point au piff dans l'interval
+            PointRetour new_point = random_point(p1,p2);
+
+            double value = sum_valule(new_point,cont_centre_influence);
+			double coef_total = sum_coef (cont_centre_influence);
+			
+			if ( linear_rand(mt) < (value/coef_total))
+			{
+				retour = new_point;
+				fini = true;
+			}
         }
         return retour;
     }
