@@ -13,11 +13,6 @@
 #include <cctype>
 
 
-// decoupe avec "je-suis-ton-pere" en " je suis ton pere"
-std::vector<std::string> inline decoupe (const std::string& chaine, const char& separateur)
-{
-    return decoupe(chaine,std::string(separateur));
-}
 
 // la version ou  la limite est un string;
 // l'entre est prise en copie, on peut l'utiliser directement
@@ -37,6 +32,14 @@ inline std::vector<std::string> decoupe (std::string entre,const std::string& li
     retour.push_back(entre);
     return retour;
 }
+
+// decoupe avec "je-suis-ton-pere" en " je suis ton pere"
+inline std::vector<std::string>  decoupe (const std::string& chaine, const char* separateur)
+{
+    return decoupe(chaine,std::string(separateur));
+}
+
+
 
 /*
 // decoupe avec plusieurs ligmite
