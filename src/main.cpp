@@ -53,6 +53,13 @@ int main()
 			cercles.emplace_back(5);
 			cercles.back().setPosition(centre.centre);
 	}
+	
+    for (int i= 0 ; i < 1000 ; i ++ )
+    {
+        cercles.emplace_back(2);
+	cercles.back().setPosition(random_point(centres,{0,0},{taille,taille}));
+        centres.push_back({cercles.back().getPosition(),s,0.25});
+    }
 
     while (window.isOpen())
     {

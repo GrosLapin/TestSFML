@@ -21,16 +21,16 @@ namespace testSFML {
     }
 
     /***
-	 * 
+	 *
 	 * Je sais que la conversion peut faire des trucs moches (comme des warnings)
-	 * Je pourrais ecrire un code qui ne fait jamais de warnings mais je considaire que si 
+	 * Je pourrais ecrire un code qui ne fait jamais de warnings mais je considaire que si
 	 * l'utilisateur compile en -WConversion c'est qu'il veut les avoirs
-	 * donc je les bloques pas 
+	 * donc je les bloques pas
 	 * **/
     template<   class Point,
                 class Point2, // on match le meme concept mais pas forcmeent la meme vrais classe
-                class V = typename std::enable_if< is_point<Point>::value >::type,
-                class X = typename std::enable_if< is_point<Point2>::value >::type
+                class X = typename std::enable_if< is_point<Point>::value >::type,
+                class XX= typename std::enable_if< is_point<Point2>::value >::type
             >
     inline double distance ( Point&& p1,  Point2& p2)
     {
@@ -44,35 +44,35 @@ namespace testSFML {
     }
 
     /***
-	 * 
-	 * 
+	 *
+	 *
 	 * Fait la conversion d'un point à un autre. globalement ça sert a dire au compilateur qu'on sais ce qu'on fait
 	 * Et qu'on veux pas de warnings
-	 * 
+	 *
 	 ***/
-    template < 	class PointCible, 
-				class PointFrom,
-				class V = typename std::enable_if< is_point<PointCible>::value >::type,
-				class W = typename std::enable_if< is_point<PointFrom>::value >::type>
+    template < 	class PointCible,
+                class PointFrom,
+                class X = typename std::enable_if< is_point<PointCible>::value >::type,
+                class W = typename std::enable_if< is_point<PointFrom>::value >::type>
 	PointCible convert_to (const PointFrom && from)
 	{
 			using type_cible_x = decltype ( getX ( std::declval<PointCible>() ));
 			using type_cible_y = decltype ( getY ( std::declval<PointCible>() ));
 			return { type_cible_x(getX(from)) , type_cible_y(getY(from)) };
 	}
-	
+
 	/***
-	 * 
+	 *
 	 * Creation d'un point dans le rectangle defini par les deux autres points
 	 * distributions lineaire.
-	 * 
+	 *
 	 **/
     template< class PointRetour = sf::Vector2f,
               class Point1 = sf::Vector2f,
               class Point2 = sf::Vector2f,
-              class V = typename std::enable_if< is_point<PointRetour>::value >::type,
-              class W = typename std::enable_if< is_point<Point1>::value >::type,
-              class X = typename std::enable_if< is_point<Point2>::value >::type
+              class X =  typename std::enable_if< is_point<PointRetour>::value >::type,
+              class XX = typename std::enable_if< is_point<Point1>::value >::type,
+              class XXX = typename std::enable_if< is_point<Point2>::value >::type
             >
     inline PointRetour random_point(const Point1& p1,const Point2& p2 )
     {
@@ -86,15 +86,14 @@ namespace testSFML {
         return {random_x(mt),random_y(mt)};
     }
 
-    
+
     template <  class Point = sf::Vector2f,
-                class W = typename std::enable_if< is_point<Point>::value >::type>
+               class X = typename std::enable_if< is_point<Point>::value >::type>
     struct centre_influence
     {
         Point centre;
         normal repartition;
         double coef = 100 ;
-
         template <  class Point2 = sf::Vector2f,
                     class WW = typename std::enable_if< is_point<Point2>::value >::type>
         double getValue(const Point2 & pt) const
@@ -105,10 +104,11 @@ namespace testSFML {
         }
     };
 
-	
+
     template <  class conteneur ,
                 class Point = sf::Vector2f,
-                class X = typename std::enable_if< is_point<Point>::value >::type>
+                class X = typename std::enable_if< is_point<Point>::value >::type,
+                class XX = typename std::enable_if< is_container<conteneur>::value >::type>
     double sum_valule (const Point& p , const conteneur& cont_centre_influence )
     {
 		return std::accumulate	(	cont_centre_influence.begin(),
@@ -117,8 +117,9 @@ namespace testSFML {
 									[&](const double & somme , const auto centre) { return somme + centre.getValue(p); }
 								);
     }
-    
-	template <  class conteneur >
+
+	template <  class conteneur ,
+                    class XX = typename std::enable_if< is_container<conteneur>::value >::type >
     double sum_coef( const conteneur& cont_centre_influence )
     {
         return std::accumulate	(	cont_centre_influence.begin(),
@@ -129,27 +130,28 @@ namespace testSFML {
     }
 
 
-    
+
     /****
-	 * 
-	 * 
-	 * 
+	 *
+	 *
+	 *
 	 **/
 	template <  class conteneur ,
                 class PointRetour = sf::Vector2f,
                 class Point1 = sf::Vector2f,
                 class Point2 = sf::Vector2f,
-                class V = typename std::enable_if< is_point<PointRetour>::value >::type,
-                class W = typename std::enable_if< is_point<Point1>::value >::type,
-                class X = typename std::enable_if< is_point<Point2>::value >::type>
+                class X =  typename std::enable_if< is_point<PointRetour>::value >::type,
+                class XX=  typename std::enable_if< is_point<Point1>::value >::type,
+                class XY=  typename std::enable_if< is_point<Point2>::value >::type,
+                class ZX = typename std::enable_if< is_container<conteneur>::value >::type>
     PointRetour random_point (const conteneur& cont_centre_influence, const Point1& p1,const Point2& p2)
     {
         PointRetour retour;
-		
+
 		std::random_device rd;
         std::mt19937 mt(rd());
         std::uniform_real_distribution<double> linear_rand (0,1);
-		
+
 		bool fini = false;
         while (!fini)
         {
@@ -158,7 +160,7 @@ namespace testSFML {
 
             double value = sum_valule(new_point,cont_centre_influence);
 			double coef_total = sum_coef (cont_centre_influence);
-			
+
 			if ( linear_rand(mt) < (value/coef_total))
 			{
 				retour = new_point;

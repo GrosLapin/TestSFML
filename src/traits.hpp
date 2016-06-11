@@ -14,14 +14,15 @@ struct void_if_valide {
 };
 
 
-template <class T, class U = void, class V = void>
+template <class T, class U = void, class V = void , class W = void>
 struct is_container : std::false_type {};
 
 template <class T>
-struct is_container<   T,
-                typename void_if_valide<decltype(std::declval<T>().begin())>::type,
-                typename void_if_valide<decltype(std::declval<T>().end())>::type
-            >  : std::true_type {};
+struct is_container<    T,
+                        typename void_if_valide<decltype(std::declval<T>().begin())>::type,
+                        typename void_if_valide<decltype(std::declval<T>().end())>::type,
+                        typename void_if_valide<decltype(std::declval<T>().size())>::type
+                    >  : std::true_type {};
 
 
 
