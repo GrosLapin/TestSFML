@@ -4,12 +4,23 @@
 #include "fonctions_grapiphiques.hpp"
 
 #include "fonctions_math.hpp"
+#include "gestion_option.hpp"
 
 using namespace testSFML;
-int main()
+int main(int argc, char** argv)
 {
-     normal s(0,1); // (default mean = zero, and standard deviation = unity)
 
+    gestion_option param(argc, argv);
+    param.add("--ecart-type-centre","1");
+    param.add("--ecart-type-maison","1");
+    param.add("--nb-maison",1000);
+
+    double ecart_type_centre = param.get_val<double>("--ecart-type-centre");
+    double ecart_type_maison = param.get_val<double>("--ecart-type-maison");
+    int nb_maison = param.get_val<int>("--nb-maison");
+
+    normal normal_centre(0,ecart_type_centre); // (default mean = zero, and standard deviation = unity)
+    normal normal_maison(0,ecart_type_maison);
 
     const int taille = 500;
     sf::RenderWindow window(sf::VideoMode(taille, taille), "SFML works!");
@@ -36,12 +47,12 @@ int main()
     std::vector<centre_influence<sf::Vector2f> > centres;
     centre_influence<sf::Vector2f> test;
     test.centre = sf::Vector2f(100,100);
-    test.repartition = s;
+    test.repartition = normal_centre;
     centres.push_back(test);
 
 
-    centres.push_back({sf::Vector2f(10,10),s});
-    centres.push_back({sf::Vector2f(200,200),s});
+    centres.push_back({sf::Vector2f(10,10),normal_centre});
+    centres.push_back({sf::Vector2f(200,200),normal_centre});
     // Pourquoi ça marche pas ?
     // centres.emplace_back(sf::Vector2f(10,200),s);
 
@@ -53,12 +64,16 @@ int main()
 			cercles.emplace_back(5);
 			cercles.back().setPosition(centre.centre);
 	}
-	
-    for (int i= 0 ; i < 1000 ; i ++ )
+
+    auto create_maison = [&] ()
     {
         cercles.emplace_back(2);
-	cercles.back().setPosition(random_point(centres,{0,0},{taille,taille}));
-        centres.push_back({cercles.back().getPosition(),s,0.25});
+        cercles.back().setPosition(random_point(centres,{0,0},{taille,taille}));
+        centres.push_back({cercles.back().getPosition(),normal_maison,1});
+    };
+    for (int i= 0 ; i < nb_maison ; i ++ )
+    {
+        create_maison();
     }
 
     while (window.isOpen())
@@ -80,12 +95,12 @@ int main()
                /* double dist =  distance(cercles.front().getPosition(),sf::Mouse::getPosition(window) ) ;
                 std::cout << "distance : " <<dist << std::endl;
 				std::cout << getGaussianValue(s,dist/100) << std::endl;*/
-			   
+
 			    double value = sum_valule(mousePos,centres);
 				double coef_total = sum_coef (centres);
-			
+
 				std::cout << "le coef total est : " << coef_total << " ; la valeur du point est : " << value << " le ratio est : " << value/coef_total << std::endl;
-				
+                std::cout << "il y a " << centres.size() << " centres "<< std::endl;
             }
 
             if ( event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Return )
@@ -94,11 +109,7 @@ int main()
 				std::cout << "entrer" << std::endl;
 				poly.emplace_back(createPolygone(points));
 				points.clear();
-				cercles.emplace_back(2);
-				cercles.back().setPosition(random_point(centres,{0,0},{taille,taille}));
-
-				centres.push_back({cercles.back().getPosition(),s,0.25});
-
+                create_maison();
 
 
 

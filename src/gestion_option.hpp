@@ -28,6 +28,11 @@ double convert_to<double> (const std::string& str) {
 }
 
 template <>
+int convert_to<int> (const std::string& str) {
+    return std::atoi(str.c_str());
+}
+
+template <>
 std::string convert_to<std::string> (const std::string& str) {
     return str;
 }
