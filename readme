@@ -1,0 +1,5 @@
+
+cd build
+# si pas deja fait : 
+#cmake .. "-GCodeBlocks - Unix Makefiles"
+nohup codeblocks Project.cbp &
