@@ -4,13 +4,34 @@
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
+#include <stdlib.h>     /* atof */
 
 #include "fonction_string.hpp"
 #include "outils.hpp"
 
 namespace testSFML {
 
-class GestionOption
+template <class T>
+struct convert_struct {
+
+};
+
+template <class T>
+T convert_to(const std::string& str) {
+    static_assert(std::is_same<T,T>::value && false, "Conversion vers un type inconnu.");
+    return T();
+}
+
+template <>
+double convert_to<double> (const std::string& str) {
+    return std::atof(str.c_str());
+}
+
+template <>
+std::string convert_to<std::string> (const std::string& str) {
+    return str;
+}
+class gestion_option
 {
 
     private :
@@ -86,7 +107,7 @@ class GestionOption
         }
 
     public :
-        GestionOption (int argc, char** argv) : vec_args_named(), vec_args_raw(), vecOptionDefault (), vecOption()
+        gestion_option (int argc, char** argv) : vec_args_named(), vec_args_raw(), vecOptionDefault (), vecOption()
         {
             if ( argc < 1 ) {
                 std::cerr << "Un programme doit avoir au moins un param : son nom. Je sais pas ce que vous avez fait, mais faites pas ca ." << std::endl;
@@ -161,8 +182,12 @@ class GestionOption
         }
 
 
-
-
+        template<class T,
+                 class U = typename std::enable_if< !is_string<T>::value >::type>
+        inline void add(std::string option, T defaultVal)
+        {
+            vecOptionDefault.push_back({option,std::to_string(defaultVal)});
+        }
         inline void add(std::string option, std::string defaultVal)
         {
             vecOptionDefault.push_back({option,defaultVal});
@@ -172,14 +197,15 @@ class GestionOption
             vecOption.push_back(option);
         }
 
-        inline std::string get_val(const std::string& id) const {
+        template<class T = std::string>
+        inline T get_val(const std::string& id) const {
             check_help();
             check_typo();
             auto it = std::find(vec_args_named.begin(), vec_args_named.end(), id);
             if ( it == vec_args_named.end() ){
                 auto itDefaut = std::find_if(vecOptionDefault.begin(), vecOptionDefault.end() , [&](auto paire) { return paire.first == id ;} );
                 if ( itDefaut != vecOptionDefault.end() ) {
-                    return itDefaut->second;
+                    return convert_to<T>(itDefaut->second);
                 }
                 else // On a pas trouvé
                 {
@@ -192,7 +218,7 @@ class GestionOption
                     }
                 }
             }
-            return it->valeur;
+            return convert_to<T>(it->valeur);
         }
 
         inline std::string get_raw_val(size_t id){

@@ -36,6 +36,7 @@ template <class T>
 struct is_string<   T,
                 typename void_if_valide<typename std::enable_if<
                                                                 std::is_same<T,std::wstring>::value ||
+                                                                std::is_same<T,const char*>::value ||
                                                                 std::is_same<T,std::string>::value
                                                                 >::type
                                         >::type
