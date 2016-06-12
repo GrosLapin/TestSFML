@@ -8,34 +8,11 @@
 
 #include "fonction_string.hpp"
 #include "outils.hpp"
+#include "convertion.hpp"
+
 
 namespace testSFML {
 
-template <class T>
-struct convert_struct {
-
-};
-
-template <class T>
-T convert_to(const std::string& str) {
-    static_assert(std::is_same<T,T>::value && false, "Conversion vers un type inconnu.");
-    return T();
-}
-
-template <>
-double convert_to<double> (const std::string& str) {
-    return std::atof(str.c_str());
-}
-
-template <>
-int convert_to<int> (const std::string& str) {
-    return std::atoi(str.c_str());
-}
-
-template <>
-std::string convert_to<std::string> (const std::string& str) {
-    return str;
-}
 class gestion_option
 {
 
@@ -63,16 +40,19 @@ class gestion_option
         std::string nomProgramme;
         size_t nbArg;
 
-        // si l'utilisateur à fait --help
+        // si l'utilisateur a fait --help
         bool helpNeeded=false;
-        std::string message_aide;
+        // si l'utilisateur a fait --generate
+        bool generate_file = false;
+        
+        std::string message_aide,message_fichier;
 
 
         std::vector<IdValeur> vec_args_named;
         std::vector<std::string> vec_args_raw;
 
-        std::vector<std::pair<std::string,std::string>> vecOptionDefault;
-        std::vector<std::string> vecOption;
+        std::vector<std::pair<std::string,std::string>> vec_option_default, vec_option_fichier;
+        std::vector<std::string> vec_option;
 
 
         bool hasSeparateur (std::string param)
@@ -102,17 +82,44 @@ class gestion_option
         inline void check_typo() const {
             for (auto opt : vec_args_named ) {
 
-               auto itDefaut = std::find_if(vecOptionDefault.begin(), vecOptionDefault.end() , [&](auto paire) { return paire.first == opt.id ;} );
-               if ( itDefaut == vecOptionDefault.end() &&
-                    std::find(vecOption.begin(),vecOption.end(),opt.id) == vecOption.end() )
+               auto if_defaut = std::find_if(vec_option_default.begin(), vec_option_default.end() , [&](auto paire) { return paire.first == opt.id ;} );
+               if ( if_defaut == vec_option_default.end() &&
+                    std::find(vec_option.begin(),vec_option.end(),opt.id) == vec_option.end() )
                {
                    erreur ("L'option " + opt.id + " n'est pas prÃ©vu par le programme.");
                }
             }
         }
+    
+        inline void generate () const {
+            if ( generate_file ) {
+                std::ofstream flux (nomProgramme+".param");
+                auto make_commentaire = [&](const std::string & ligne) 
+                {
+                    flux << "#  " << ligne << std::endl;  
+                };
+                make_commentaire ("fichier auto generé");
+                make_commentaire (" vous pouvez l'utiliser en ajoutant l'option suivante a votre ligne de commande");
+                make_commentaire (" --load-file="+nomProgramme+".param");
+                make_commentaire ("");
+                make_commentaire ("Option par defaut du programme :");
+                for (const auto& pair : vec_option_default )
+                {
+                    flux << pair.first << "=" <<pair.second << std::endl;
+                }
+                make_commentaire ("Option sans valeur par defaut ( à décomenter et compléter ):");
+                for (const auto& s : vec_option )
+                {
+                    make_commentaire(s+"=");
+                }
+                std::cerr << "Generation du fichier " << nomProgramme+".param" << std::endl;
+                exit(5);
+            }
+            
+        }
 
     public :
-        gestion_option (int argc, char** argv) : vec_args_named(), vec_args_raw(), vecOptionDefault (), vecOption()
+        gestion_option (int argc, char** argv) : vec_args_named(), vec_args_raw(), vec_option_default (), vec_option()
         {
             if ( argc < 1 ) {
                 std::cerr << "Un programme doit avoir au moins un param : son nom. Je sais pas ce que vous avez fait, mais faites pas ca ." << std::endl;
@@ -127,12 +134,20 @@ class gestion_option
             for (int i = 1 ; i < argc ; i ++ )
             {
                 std::string param (argv[i]);
-                if (param == "--help" ) { helpNeeded = true;}
+                if (param == "--help" ) { helpNeeded = true; continue;}
+                if (param == "--generate" ) { generate_file= true; continue;}
 
                 if ( hasSeparateur(param) )
                 {
                     auto option_temps = decoupe(param,separateur);
-                    vec_args_named.push_back({option_temps[0],option_temps[1]});
+                    if (option_temps[0]== "--load-file") 
+                    {
+                        load_file(option_temps[1],true); // si le fichier n'existe pas on prévient l'user 
+                    }
+                    else
+                    {
+                        vec_args_named.push_back({option_temps[0],option_temps[1]});
+                    }
                 }
                 else // si c'est un param brute
                 {
@@ -141,8 +156,44 @@ class gestion_option
             }
 
         };
+        
+        
+        // ne retourne pas d'erreur si le fichier n'existe pas, si ça se trouve c'est volontaire et 
+        // les options sont deja passé en param
+        inline void load_file (const std::string& file, bool assert_file_valide = false)
+        {
+            std::ifstream flux(file);
+            if (flux)
+            {
+                std::string ligne;
+                while (std::getline(flux,ligne))
+                {
+                    ligne = ligne_sans_commentaire (ligne);
+                    if ( hasSeparateur ( ligne) )
+                    {
+                        auto option_temps = decoupe(ligne,separateur);
+                        vec_option_fichier.push_back({option_temps[0],option_temps[1]});
+                    }
+                }
+                
+                // gestion du message de fichier
+                if ( message_fichier.empty() )
+                {
+                    message_fichier += " Chargement des options depuis le(s) fichier(s) : " + file +" ";
+                }
+                else {
+                    message_fichier += file + " ";
+                }
+            }
+            else if ( assert_file_valide )
+            {
+               std::cerr << "Le fichier d'option " << file << " n'est pas un fichier valide." << std::endl;
+               exit(4);
+            }
+        }
 
-        inline void min_raw_args(size_t min) const {
+        inline void min_raw_args(size_t min) const 
+        {
 
             if ( vec_args_raw.size() < min )
             {
@@ -191,43 +242,57 @@ class gestion_option
                  class U = typename std::enable_if< !is_string<T>::value >::type>
         inline void add(std::string option, T defaultVal)
         {
-            vecOptionDefault.push_back({option,std::to_string(defaultVal)});
+            vec_option_default.push_back({option,std::to_string(defaultVal)});
         }
         inline void add(std::string option, std::string defaultVal)
         {
-            vecOptionDefault.push_back({option,defaultVal});
+            vec_option_default.push_back({option,defaultVal});
         }
         inline void add(std::string option)
         {
-            vecOption.push_back(option);
+            vec_option.push_back(option);
         }
 
         template<class T = std::string>
         inline T get_val(const std::string& id) const {
             check_help();
             check_typo();
+            generate ();
+            // est ce qu'on a l'option dans les param ? 
             auto it = std::find(vec_args_named.begin(), vec_args_named.end(), id);
-            if ( it == vec_args_named.end() ){
-                auto itDefaut = std::find_if(vecOptionDefault.begin(), vecOptionDefault.end() , [&](auto paire) { return paire.first == id ;} );
-                if ( itDefaut != vecOptionDefault.end() ) {
-                    return convert_to<T>(itDefaut->second);
+            if ( it != vec_args_named.end() ) 
+            {
+                // si oui il a la priorité 
+                return convert_to<T>(it->valeur);
+            }
+            
+            // si non, est ce qu'il est dans le fichier ? 
+            auto it_fichier = std::find_if(vec_option_fichier.begin(), vec_option_fichier.end() , [&](auto paire) { return paire.first == id ;} );
+            if ( it_fichier!= vec_option_fichier.end() ) {
+                return convert_to<T>(it_fichier->second);
+            }
+            
+            // si toujours pas on regarde les options par defaut
+            auto if_defaut = std::find_if(vec_option_default.begin(), vec_option_default.end() , [&](auto paire) { return paire.first == id ;} );
+            // si on trouve pas on affiche une erreur
+            if ( if_defaut == vec_option_default.end() ) {
+                // on affiche le message d'erreur qui va bien
+                if (std::find(vec_option.begin(),vec_option.end(),id) != vec_option.end()) {
+                    erreur("L'option " +id+" n'a pas de valeur par defaut est n'est pas présente");
                 }
-                else // On a pas trouvé
-                {
-                    // on affiche le message d'erreur qui va bien
-                    if (std::find(vecOption.begin(),vecOption.end(),id) != vecOption.end()) {
-                        erreur("L'option " +id+" n'a pas de valeur par defaut est n'est pas présente");
-                    }
-                    else{
-                        erreur("Le programme demande une option qui n'est pas dans les options prévue par le programme... Dev tu t'es chier..");
-                    }
+                else{
+                    erreur("Le programme demande une option qui n'est pas dans les options prévue par le programme... Dev tu t'es chier..");
                 }
             }
-            return convert_to<T>(it->valeur);
+            
+            // si on arrive la c'est qu'on a trouvé donc on est safe,
+            // j'ai du inverser la logique pour que le compilateur ne stress pas de ne pas avoir de retour;
+            return convert_to<T>(if_defaut->second);
         }
 
         inline std::string get_raw_val(size_t id){
             check_help();
+            generate ();
             if ( id < vec_args_raw.size() ){
                 erreur("vous avez demandez l'indice " + std::to_string(id) + " alors qu'il n'y a que " + std::to_string(vec_args_raw.size()) + " params");
             }
@@ -245,22 +310,25 @@ class gestion_option
 
         inline std::vector<std::string> get_raw_args (){
             check_help();
+            generate ();
             return vec_args_raw;
         }
 
         inline std::string usage() const {
             std::string retour =  "Usage : \n./"+get_name_file(nomProgramme)+" ";
-            for (auto& opt : vecOption)
+            for (auto& opt : vec_option)
             {
                 retour += opt+"=valeur ";
             }
 
-            for (auto& opt : vecOptionDefault)
+            for (auto& opt : vec_option_default)
             {
                 retour += opt.first+"=valeur (default:"+opt.second+") ";
             }
-
+            retour += "\n";
+            retour +=  message_fichier;
             retour +=  message_aide;
+            retour += "\n l'ordre de priorité des options est : Ligne de commande > fichier > option par defaut \n";
             return retour;
         }
 

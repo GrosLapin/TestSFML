@@ -14,6 +14,9 @@ int main(int argc, char** argv)
     param.add("--ecart-type-centre","1");
     param.add("--ecart-type-maison","1");
     param.add("--nb-maison",1000);
+    
+    param.allow_raw_args(false);
+    param.load_file("./exe.param");
 
     double ecart_type_centre = param.get_val<double>("--ecart-type-centre");
     double ecart_type_maison = param.get_val<double>("--ecart-type-maison");
