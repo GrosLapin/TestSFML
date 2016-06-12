@@ -86,7 +86,7 @@ class gestion_option
                if ( if_defaut == vec_option_default.end() &&
                     std::find(vec_option.begin(),vec_option.end(),opt.id) == vec_option.end() )
                {
-                   erreur ("L'option " + opt.id + " n'est pas prÃ©vu par le programme.");
+                   erreur ("L'option \"" + opt.id + "\" n'est pas prévu par le programme.");
                }
             }
         }
@@ -119,13 +119,21 @@ class gestion_option
         }
 
     public :
-        gestion_option (int argc, char** argv) : vec_args_named(), vec_args_raw(), vec_option_default (), vec_option()
+        
+        inline std::string get_separateur () const { return separateur; }
+
+        gestion_option (int argc, char** argv, std::string sep="=") : separateur(sep), vec_args_raw(), vec_option_default (), vec_option()
         {
             if ( argc < 1 ) {
                 std::cerr << "Un programme doit avoir au moins un param : son nom. Je sais pas ce que vous avez fait, mais faites pas ca ." << std::endl;
                 exit(5);
             }
 
+            if ( separateur.empty() ) {
+                std::cerr << "Séparateur vide" << std::endl;
+                exit(5);
+            }
+            
             // on sort le nom du programme des options
             nbArg = (size_t)argc-1; // on peut faire la convertion grace au if du dessus
             nomProgramme = argv[0];
@@ -179,7 +187,7 @@ class gestion_option
                 // gestion du message de fichier
                 if ( message_fichier.empty() )
                 {
-                    message_fichier += " Chargement des options depuis le(s) fichier(s) : " + file +" ";
+                    message_fichier += "Chargement des options depuis le(s) fichier(s) : " + file +" ";
                 }
                 else {
                     message_fichier += file + " ";
@@ -239,7 +247,8 @@ class gestion_option
 
 
         template<class T,
-                 class U = typename std::enable_if< !is_string<T>::value >::type>
+                 class U = typename std::enable_if< !is_string<T>::value >::type,
+                 class V = decltype(std::to_string(std::declval<T>())) >
         inline void add(std::string option, T defaultVal)
         {
             vec_option_default.push_back({option,std::to_string(defaultVal)});
@@ -328,7 +337,7 @@ class gestion_option
             retour += "\n";
             retour +=  message_fichier;
             retour +=  message_aide;
-            retour += "\n l'ordre de priorité des options est : Ligne de commande > fichier > option par defaut \n";
+            retour += "\nl'ordre de priorité des options est : Ligne de commande > fichier > option par defaut \n";
             return retour;
         }
 
