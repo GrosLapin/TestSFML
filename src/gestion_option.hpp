@@ -235,13 +235,13 @@ class gestion_option
         }
 
 
-        inline void mustBeValideFile(const std::vector<std::string>& listTag) 
+        inline void mustBeValideFile(const std::vector<std::string>& listTag) const
         {
             bool ok = true;
             std::string fichiers_fails = "";
             for(const auto& tag : listTag )
             {
-                 auto path = get_val(tag);
+                 auto path = get_val_unsafe(tag);
                  if ( ! file_exists(path) )
                  {
                      ok = false;
@@ -276,11 +276,10 @@ class gestion_option
         }
 
         template<class T = std::string>
-        inline T get_val(const std::string& id)  {
-            check_help();
-            check_typo();
+        inline T get_val_unsafe(const std::string& id) const {
+			check_help();
             generate ();
-			can_add_param =false;
+
             // est ce qu'on a l'option dans les param ? 
             auto it = std::find(vec_args_named.begin(), vec_args_named.end(), id);
             if ( it != vec_args_named.end() ) 
@@ -311,6 +310,13 @@ class gestion_option
             // si on arrive la c'est qu'on a trouvé donc on est safe,
             // j'ai du inverser la logique pour que le compilateur ne stress pas de ne pas avoir de retour;
             return convert_to<T>(if_defaut->second);
+		}
+        template<class T = std::string>
+        inline T get_val(const std::string& id)  {
+			check_typo();
+			can_add_param =false;
+			return get_val_unsafe<T>(id);
+            
         }
 
         inline std::string get_raw_val(size_t id){

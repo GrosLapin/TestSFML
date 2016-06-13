@@ -7,6 +7,7 @@
 #include "gestion_option.hpp"
 
 using namespace testSFML;
+using namespace std;
 int main(int argc, char** argv)
 {
 
@@ -27,21 +28,22 @@ int main(int argc, char** argv)
 
     const int taille = 500;
     sf::RenderWindow window(sf::VideoMode(taille, taille), "SFML works!");
-
+	sf::View view1(window.getDefaultView());
+	window.setView(view1);
 
     std::cout << "v2F " << is_point<sf::Vector2f>::value << std::endl;
     std::cout << "v2i " << is_point<sf::Vector2i>::value << std::endl;
     std::cout << is_point<int>::value << std::endl;
     std::cout << is_point<lapin>::value << std::endl;
 
-    std::vector<sf::Vector2f> points = { {0,0} , {150,10} , {120,90}  , {30,100} , {0,50}};
-
+   
 
 	std::vector<sf::ConvexShape> poly;
-	poly.emplace_back(createPolygone(points));
-	poly.emplace_back(createPolygone({ {100,100} , {250,110} , {220,190}  , {130,200} , {100,150}}));
-
-     points.clear();
+	poly.emplace_back(createPolygone({ {0,0} , {0,taille} , {taille,taille}  , {taille,0}}));
+	poly.back().setFillColor(sf::Color::Transparent);
+	poly.back().setOutlineThickness(2);
+	poly.back().setOutlineColor(sf::Color(250, 150, 100));
+	std::vector <sf::Vector2f> points;
 
 
     std::vector <sf::CircleShape> cercles;
@@ -79,14 +81,40 @@ int main(int argc, char** argv)
         create_maison();
     }
 
+    
+    sf::Clock timer;
+
+	float temps = 0 ;
     while (window.isOpen())
     {
+			
+		
+			float px_par_sec = 100;
+
+			// le deplacement de la map
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)   )  {  view1.move( 0,      -temps*px_par_sec) ; }
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) )  {  view1.move( 0,       temps*px_par_sec) ;}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) )  {  view1.move(-temps*px_par_sec,  0);}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))  {  view1.move(temps*px_par_sec,   0);}
+
+			// le zoom
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Add) )         view1.zoom(1.005f);
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Subtract) )    view1.zoom(0.995f);
+
+			
+			
+			window.setView(view1);
         sf::Event event;
         while (window.pollEvent(event))
         {
+			
+
+
             if (event.type == sf::Event::Closed)
                 window.close();
 
+			
+			
 			if ((event.type == sf::Event::MouseButtonPressed) && (event.mouseButton.button == sf::Mouse::Left))
             {
 				/*std::cout << " x : " << event.mouseButton.x << " y : " <<   event.mouseButton.y  << std::endl;
@@ -113,17 +141,17 @@ int main(int argc, char** argv)
 				poly.emplace_back(createPolygone(points));
 				points.clear();
                 create_maison();
-
+				view1.zoom(2);
 
 
 			}
         }
 
         window.clear();
-		/*for (const auto& convex : poly)
+		for (const auto& convex : poly)
 		{
 			window.draw(convex);
-		}*/
+		}
 
         for (const auto& circle : cercles)
         {
@@ -131,6 +159,8 @@ int main(int argc, char** argv)
         }
 
         window.display();
+		temps =  (float)timer.getElapsedTime().asSeconds ();
+		timer.restart();
     }
 
     return 0;
