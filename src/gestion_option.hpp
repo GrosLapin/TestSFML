@@ -44,6 +44,16 @@ class gestion_option
         bool helpNeeded=false;
         // si l'utilisateur a fait --generate
         bool generate_file = false;
+		// on ne peut ajouter des params uniquement avant d'avoir commencer
+		// a lire les valeurs
+		bool can_add_param = true;
+		void check_can_add () const {
+			if ( ! can_add_param )
+			{
+				std::cerr << "On ne peut pas faire de .add(..) apres avoir fait un .get_val " << std::endl;
+				exit(5);
+			}
+		}
         
         std::string message_aide,message_fichier;
 
@@ -225,7 +235,7 @@ class gestion_option
         }
 
 
-        inline void mustBeValideFile(const std::vector<std::string>& listTag) const
+        inline void mustBeValideFile(const std::vector<std::string>& listTag) 
         {
             bool ok = true;
             std::string fichiers_fails = "";
@@ -251,22 +261,26 @@ class gestion_option
                  class V = decltype(std::to_string(std::declval<T>())) >
         inline void add(std::string option, T defaultVal)
         {
+			check_can_add ();
             vec_option_default.push_back({option,std::to_string(defaultVal)});
         }
         inline void add(std::string option, std::string defaultVal)
         {
+			check_can_add ();
             vec_option_default.push_back({option,defaultVal});
         }
         inline void add(std::string option)
         {
+			check_can_add ();
             vec_option.push_back(option);
         }
 
         template<class T = std::string>
-        inline T get_val(const std::string& id) const {
+        inline T get_val(const std::string& id)  {
             check_help();
             check_typo();
             generate ();
+			can_add_param =false;
             // est ce qu'on a l'option dans les param ? 
             auto it = std::find(vec_args_named.begin(), vec_args_named.end(), id);
             if ( it != vec_args_named.end() ) 
