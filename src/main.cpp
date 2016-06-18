@@ -5,6 +5,7 @@
 
 #include "fonctions_math.hpp"
 #include "gestion_option.hpp"
+#include "route.hpp"
 
 using namespace testSFML;
 using namespace std;
@@ -23,6 +24,16 @@ int main(int argc, char** argv)
     double ecart_type_maison = param.get_val<double>("--ecart-type-maison");
     int nb_maison = param.get_val<int>("--nb-maison");
 
+    // creation des routes pour verifier que ça marche bien
+    vector<sf::VertexArray> vec_lignes;
+    vector<route<sf::Vector2f>> routes;
+    routes.emplace_back(sf::Vector2f(-5,-5));
+    routes.back().add({-10 , -20});
+    routes.back().add({-50 , -20});
+    
+    vec_lignes.push_back(create_lines(routes.back()));
+    
+    
     normal normal_centre(0,ecart_type_centre); // (default mean = zero, and standard deviation = unity)
     normal normal_maison(0,ecart_type_maison);
 
@@ -39,7 +50,7 @@ int main(int argc, char** argv)
    
 
 	std::vector<sf::ConvexShape> poly;
-	poly.emplace_back(createPolygone({ {0,0} , {0,taille} , {taille,taille}  , {taille,0}}));
+	poly.emplace_back(create_polygone({ {0,0} , {0,taille} , {taille,taille}  , {taille,0}}));
 	poly.back().setFillColor(sf::Color::Transparent);
 	poly.back().setOutlineThickness(2);
 	poly.back().setOutlineColor(sf::Color(250, 150, 100));
@@ -58,17 +69,12 @@ int main(int argc, char** argv)
 
     centres.push_back({sf::Vector2f(10,10),normal_centre});
     centres.push_back({sf::Vector2f(200,200),normal_centre});
-    // Pourquoi ça marche pas ?
-    // centres.emplace_back(sf::Vector2f(10,200),s);
 
-
-      // centres.emplace_back();
-
-	for (const auto& centre : centres )
-	{
-			cercles.emplace_back(5);
-			cercles.back().setPosition(centre.centre);
-	}
+    for (const auto& centre : centres )
+    {
+        cercles.emplace_back(5);
+        cercles.back().setPosition(centre.centre);
+    }
 
     auto create_maison = [&] ()
     {
@@ -89,21 +95,25 @@ int main(int argc, char** argv)
     {
 			
 		
-			float px_par_sec = 100;
+        
+        // gestion des touches pour la navigation
+        float px_par_sec = 100;
 
-			// le deplacement de la map
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)   )  {  view1.move( 0,      -temps*px_par_sec) ; }
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) )  {  view1.move( 0,       temps*px_par_sec) ;}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) )  {  view1.move(-temps*px_par_sec,  0);}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))  {  view1.move(temps*px_par_sec,   0);}
+        // le deplacement de la map
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)   )  {  view1.move( 0,      -temps*px_par_sec) ; }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) )  {  view1.move( 0,       temps*px_par_sec) ;}
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) )  {  view1.move(-temps*px_par_sec,  0);}
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))  {  view1.move(temps*px_par_sec,   0);}
 
-			// le zoom
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Add) )         view1.zoom(1.005f);
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Subtract) )    view1.zoom(0.995f);
+        // le zoom
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Add) )          view1.zoom(0.995f);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Subtract) )     view1.zoom(1.005f); 
 
-			
-			
-			window.setView(view1);
+        
+        
+        window.setView(view1);
+        
+        
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -138,7 +148,7 @@ int main(int argc, char** argv)
 			{
 
 				std::cout << "entrer" << std::endl;
-				poly.emplace_back(createPolygone(points));
+				poly.emplace_back(create_polygone(points));
 				points.clear();
                 create_maison();
 				view1.zoom(2);
@@ -148,10 +158,15 @@ int main(int argc, char** argv)
         }
 
         window.clear();
-		for (const auto& convex : poly)
-		{
-			window.draw(convex);
-		}
+        
+        for (const auto& lines : vec_lignes )
+        {
+            window.draw(lines);
+        }
+        for (const auto& convex : poly)
+        {
+            window.draw(convex);
+        }
 
         for (const auto& circle : cercles)
         {

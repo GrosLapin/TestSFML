@@ -40,8 +40,28 @@ inline std::ostream& operator<< (std::ostream& out, const Point& p)
     return out;
 }
 
+
+template <class Conteneur = std::vector<sf::Vector2f> >
+sf::VertexArray create_lines (Conteneur && points)
+{
+
+    sf::VertexArray lines (sf::LinesStrip, points.size() );
+
+    // définit les points
+    size_t cpt = 0 ;
+    for (auto && point : points )
+    {
+        lines[cpt].position = sf::Vector2f(getX(point), getY(point));
+        cpt++;
+    }
+
+    return lines;
+
+}
+
+// sempai, static assert moi !!
 template<class Conteneur = std::vector<sf::Vector2f> >
-sf::ConvexShape createPolygone (Conteneur && points)
+sf::ConvexShape create_polygone (Conteneur && points)
 {
 	//std::cout << typeid(points).name() << std::endl;
 	//std::cout << typeid(points[0]).name ()<< std::endl;
