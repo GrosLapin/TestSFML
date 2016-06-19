@@ -14,8 +14,10 @@
 #include <numeric>
 #include <random>
 #include <cassert>
+#include <cmath>
 namespace testSFML {
 
+	constexpr double PI = 3.141592653589793;
     using boost::math::normal; // typedef provides default type is double.
 
     inline double getGaussianValue(const normal& norm, const double& distance ){
@@ -47,6 +49,48 @@ namespace testSFML {
 
 
 
+    template < 	class Point,
+				class Point2,
+				class Point3,
+				class X  = typename std::enable_if< is_point<Point>::value >::type,
+				class XX = typename std::enable_if< is_point<Point2>::value >::type,
+				class XXX= typename std::enable_if< is_point<Point3>::value >::type
+			 >
+    inline double angle_rad ( Point&& p1,Point2&& centre,Point3&& p2)
+	{
+		double distance_1_centre = distance (p1,centre);
+		double distance_2_centre = distance (p2,centre);
+		double distance_1_2 	 = distance (p1,p2);
+		
+		return acos(  ( pow ( distance_1_centre ,2) + pow ( distance_2_centre ,2) - pow ( distance_1_2 ,2))  
+					  /
+					  (2 * distance_1_centre * distance_2_centre)
+					);
+	}
+
+	template < class N >
+	inline double convertion_rad_deg ( N&& value ) 
+	{
+		return (value *180 ) / PI;
+	}
+	    
+	
+	template < 	class Point,
+				class Point2,
+				class Point3,
+				class X  = typename std::enable_if< is_point<Point>::value >::type,
+				class XX = typename std::enable_if< is_point<Point2>::value >::type,
+				class XXX= typename std::enable_if< is_point<Point3>::value >::type
+			>
+	inline double angle_deg ( Point&& p1,Point2&& centre,Point3&& p2)
+	{
+		return convertion_rad_deg ( angle_rad ( std::forward<Point>(p1 ), 
+												std::forward<Point2> (centre),
+												std::forward<Point3> (p2 )
+											  )
+								  );
+	}
+	
 	/***
 	 *
 	 * Creation d'un point dans le rectangle defini par les deux autres points

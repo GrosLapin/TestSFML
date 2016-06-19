@@ -63,17 +63,16 @@ sf::VertexArray create_lines (Conteneur && points)
 template<class Conteneur = std::vector<sf::Vector2f> >
 sf::ConvexShape create_polygone (Conteneur && points)
 {
-	//std::cout << typeid(points).name() << std::endl;
-	//std::cout << typeid(points[0]).name ()<< std::endl;
+	static_assert(is_container<Conteneur>::value, "Le parametre n'est pas un conteneur");
+	static_assert(is_point<decltype (points[0])>::value, "Le conteneur ne contient pas de point");
+	
     sf::ConvexShape convex;
-  //  std::cout << points.size() << std::endl;
-    convex.setPointCount(points.size());
+	convex.setPointCount(points.size());
 
     // définit les points
     size_t cpt = 0 ;
     for (auto && point : points )
     {
-      //  std::cout << point << std::endl;
         convex.setPoint(cpt, sf::Vector2f(getX(point), getY(point)));
         cpt++;
     }

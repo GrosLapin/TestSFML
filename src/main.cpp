@@ -88,6 +88,10 @@ int main(int argc, char** argv)
     }
 
     
+    
+    
+    
+    
     sf::Clock timer;
 
 	float temps = 0 ;
@@ -105,9 +109,9 @@ int main(int argc, char** argv)
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) )  {  view1.move(-temps*px_par_sec,  0);}
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))  {  view1.move(temps*px_par_sec,   0);}
 
-        // le zoom
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Add) )          view1.zoom(0.995f);
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Subtract) )     view1.zoom(1.005f); 
+        // le zoom ( + et - et p et m pour les clavier sans pavé numérique )
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Add) || sf::Keyboard::isKeyPressed(sf::Keyboard::P ) )         view1.zoom(0.995f);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Subtract) || sf::Keyboard::isKeyPressed(sf::Keyboard::P ) )     view1.zoom(1.005f); 
 
         
         
@@ -127,33 +131,28 @@ int main(int argc, char** argv)
 			
 			if ((event.type == sf::Event::MouseButtonPressed) && (event.mouseButton.button == sf::Mouse::Left))
             {
-				/*std::cout << " x : " << event.mouseButton.x << " y : " <<   event.mouseButton.y  << std::endl;
-				std::cout << "abs :" << sf::Mouse::getPosition() << std::endl;
-				std::cout << "relatif : " <<  sf::Mouse::getPosition(window) << std::endl;*/
+
 				auto mousePos = convert_to<sf::Vector2f> ( sf::Mouse::getPosition(window) );
 				points.emplace_back(mousePos);
+				
+				if ( points.size() == 3 )
+				{
+					vec_lignes.push_back(create_lines(points));
+					cout << angle_deg (points[0],points[1],points[2]) << endl;
+				}
+				if ( points.size() > 3 )
+				{
+					vec_lignes.erase(vec_lignes.end()-1);
+					points.clear();	
+				}
 
-               /* double dist =  distance(cercles.front().getPosition(),sf::Mouse::getPosition(window) ) ;
-                std::cout << "distance : " <<dist << std::endl;
-				std::cout << getGaussianValue(s,dist/100) << std::endl;*/
 
-			    double value = sum_valule(mousePos,centres);
-				double coef_total = sum_coef (centres);
-
-				std::cout << "le coef total est : " << coef_total << " ; la valeur du point est : " << value << " le ratio est : " << value/coef_total << std::endl;
-                std::cout << "il y a " << centres.size() << " centres "<< std::endl;
             }
 
             if ( event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Return )
 			{
-
-				std::cout << "entrer" << std::endl;
-				poly.emplace_back(create_polygone(points));
+				vec_lignes.erase(vec_lignes.end()-1);
 				points.clear();
-                create_maison();
-				view1.zoom(2);
-
-
 			}
         }
 
