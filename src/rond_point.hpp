@@ -20,7 +20,7 @@ public :
 	
 	rond_point() 
 	{
-		nb_route =(int)random(min_route,360/min_angle);
+		nb_route =random(min_route,(int)(360/min_angle));
 	}
 	
 	

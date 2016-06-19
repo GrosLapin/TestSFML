@@ -41,12 +41,12 @@ namespace testSFML {
 			   class N2>
     inline typename std::common_type<N,N2>::type random (N&& min, N2&& max)
 	{
-		using max_type = typename std::common_type<N,N2>::type;
-		static std::random_device rd;
-        static std::mt19937 mt(rd());
-        static random_dispatch<max_type>::distribution rand (min,max);//(max_type(min),max_type(max)); ne marche pas, etrange
+            using max_type = typename std::common_type<N,N2>::type;
+            static std::random_device rd;
+            static std::mt19937 mt(rd());
+            static typename random_dispatch<max_type>::distribution rand (min,max);//(max_type(min),max_type(max)); ne marche pas, etrange
 		// a montrer a lénaic :D
-		return rand(mt);
+            return rand(mt);
 	}
     
     
