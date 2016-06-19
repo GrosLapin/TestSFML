@@ -5,7 +5,9 @@
 
 #include "fonctions_math.hpp"
 #include "gestion_option.hpp"
+
 #include "route.hpp"
+#include "rond_point.hpp"
 
 using namespace testSFML;
 using namespace std;
@@ -42,10 +44,10 @@ int main(int argc, char** argv)
 	sf::View view1(window.getDefaultView());
 	window.setView(view1);
 
-    std::cout << "v2F " << is_point<sf::Vector2f>::value << std::endl;
-    std::cout << "v2i " << is_point<sf::Vector2i>::value << std::endl;
-    std::cout << is_point<int>::value << std::endl;
-    std::cout << is_point<lapin>::value << std::endl;
+	for (size_t i = 0; i < 10 ; i++ )
+	{
+		cout << random(0,360.0) << endl;
+	}
 
    
 

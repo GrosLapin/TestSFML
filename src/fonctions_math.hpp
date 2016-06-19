@@ -20,6 +20,37 @@ namespace testSFML {
 	constexpr double PI = 3.141592653589793;
     using boost::math::normal; // typedef provides default type is double.
 
+    
+	template <class T, class U = void >
+	struct random_dispatch {
+		using distribution = typename std::uniform_int_distribution<T>;
+	};
+
+	template <class T>
+	struct random_dispatch	<    T,
+								typename std::enable_if<std::is_floating_point<T>::value>::type
+							>  
+	{
+		using distribution = typename std::uniform_real_distribution<T>;
+		
+	};
+    // DANGER il semblerait que ça marche int int :D
+    // je me fout du std forward parce que ça sera de type double int... et dans tous les cas
+    // un forward sur un type base c'est une copie
+    template < class N,
+			   class N2>
+    inline typename std::common_type<N,N2>::type random (N&& min, N2&& max)
+	{
+		using max_type = typename std::common_type<N,N2>::type;
+		static std::random_device rd;
+        static std::mt19937 mt(rd());
+        static random_dispatch<max_type>::distribution rand (min,max);//(max_type(min),max_type(max)); ne marche pas, etrange
+		// a montrer a lénaic :D
+		return rand(mt);
+	}
+    
+    
+    
     inline double getGaussianValue(const normal& norm, const double& distance ){
         return pdf(norm,distance);
     }
@@ -106,14 +137,9 @@ namespace testSFML {
             >
     inline PointRetour random_point(const Point1& p1,const Point2& p2 )
     {
-        std::random_device rd;
-        std::mt19937 mt(rd());
-
-        // il se fout de savoir qui est le plus petit des deux, ça marche bien :)
-        std::uniform_real_distribution<float> random_x (getX(p1), getX(p2));
-        std::uniform_real_distribution<float> random_y (getY(p1), getY(p2));
-
-        return {random_x(mt),random_y(mt)};
+        return 	{ random(getX(p1), getX(p2)),
+			      random(getY(p1), getY(p2))
+				};
     }
 
 
