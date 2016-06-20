@@ -9,9 +9,10 @@
 
 namespace testSFML 
 {
-	
-	template <class Point = sf::Vector2f,
-			class  = typename std::enable_if< is_point<Point>::value >::type >
+	//  pourquoi le type par defaut ne marhce pas ? 
+	template < class Point = sf::Vector2f,
+               class  = std::enable_if_t< is_point<Point>::value >
+			 >
 	class rond_point 
 	{
 		double min_angle = 30; // 360 / 30 = 12; par 45 = 8
@@ -20,8 +21,8 @@ namespace testSFML
 		std::vector<route<Point>> routes;
 		Point centre;
 	public : 
-		
-		rond_point(Point&& pos) 
+		// et du coup pourquoi ça rond_point(Point&& pos)  ne marche pas ? 
+		rond_point(const Point& pos) 
 		{
 			centre = pos;
                         // danger ne marche sans doute pas c'est le max théorique mais pas forcement dans mon cas

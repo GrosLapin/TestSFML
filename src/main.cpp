@@ -63,6 +63,13 @@ int main(int argc, char** argv)
         create_maison();
     }
     
+    // test des ronds point et des routes 
+    std::vector<rond_point<sf::Vector2f>> rond_points;
+    for(const auto& centre : centres )
+    {
+        rond_points.push_back(rond_point<sf::Vector2f>(centre.centre));
+    }
+    
     
     // creation des routes pour verifier que ça marche bien
     routes.emplace_back(sf::Vector2f(-5,-5));
