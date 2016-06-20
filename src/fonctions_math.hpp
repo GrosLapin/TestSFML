@@ -39,13 +39,14 @@ namespace testSFML {
     // un forward sur un type base c'est une copie
     template < class N,
 			   class N2>
-    inline typename std::common_type<N,N2>::type random (N&& min, N2&& max)
+    inline std::common_type_t<N,N2> random (N&& min, N2&& max)
 	{
-            using max_type = typename std::common_type<N,N2>::type;
+            using max_type = std::common_type_t<N,N2>;
+			
             static std::random_device rd;
             static std::mt19937 mt(rd());
-            static typename random_dispatch<max_type>::distribution rand (min,max);//(max_type(min),max_type(max)); ne marche pas, etrange
-		// a montrer a lénaic :D
+            static typename random_dispatch<max_type>::distribution rand (min,max); 
+            // (max_type(min) , max_type(max)) ;  marche pas, etrange à tester avec clang
             return rand(mt);
 	}
     
@@ -64,8 +65,8 @@ namespace testSFML {
 	 * **/
     template<   class Point,
                 class Point2, // on match le meme concept mais pas forcmeent la meme vrais classe
-                class X = typename std::enable_if< is_point<Point>::value >::type,
-                class XX= typename std::enable_if< is_point<Point2>::value >::type
+                class = typename std::enable_if< is_point<Point>::value >::type,
+                class = typename std::enable_if< is_point<Point2>::value >::type
             >
     inline double distance ( Point&& p1,  Point2& p2)
     {
@@ -83,9 +84,9 @@ namespace testSFML {
     template < 	class Point,
 				class Point2,
 				class Point3,
-				class X  = typename std::enable_if< is_point<Point>::value >::type,
-				class XX = typename std::enable_if< is_point<Point2>::value >::type,
-				class XXX= typename std::enable_if< is_point<Point3>::value >::type
+				class = typename std::enable_if< is_point<Point>::value >::type,
+				class = typename std::enable_if< is_point<Point2>::value >::type,
+				class = typename std::enable_if< is_point<Point3>::value >::type
 			 >
     inline double angle_rad ( Point&& p1,Point2&& centre,Point3&& p2)
 	{
@@ -109,9 +110,9 @@ namespace testSFML {
 	template < 	class Point,
 				class Point2,
 				class Point3,
-				class X  = typename std::enable_if< is_point<Point>::value >::type,
-				class XX = typename std::enable_if< is_point<Point2>::value >::type,
-				class XXX= typename std::enable_if< is_point<Point3>::value >::type
+				class = typename std::enable_if< is_point<Point>::value >::type,
+				class = typename std::enable_if< is_point<Point2>::value >::type,
+				class = typename std::enable_if< is_point<Point3>::value >::type
 			>
 	inline double angle_deg ( Point&& p1,Point2&& centre,Point3&& p2)
 	{
@@ -131,9 +132,9 @@ namespace testSFML {
     template< class PointRetour = sf::Vector2f,
               class Point1 = sf::Vector2f,
               class Point2 = sf::Vector2f,
-              class X =  typename std::enable_if< is_point<PointRetour>::value >::type,
-              class XX = typename std::enable_if< is_point<Point1>::value >::type,
-              class XXX = typename std::enable_if< is_point<Point2>::value >::type
+              class =  typename std::enable_if< is_point<PointRetour>::value >::type,
+              class = typename std::enable_if< is_point<Point1>::value >::type,
+              class = typename std::enable_if< is_point<Point2>::value >::type
             >
     inline PointRetour random_point(const Point1& p1,const Point2& p2 )
     {
@@ -163,8 +164,8 @@ namespace testSFML {
 
     template <  class conteneur ,
                 class Point = sf::Vector2f,
-                class X = typename std::enable_if< is_point<Point>::value >::type,
-                class XX = typename std::enable_if< is_container<conteneur>::value >::type>
+                class = typename std::enable_if< is_point<Point>::value >::type,
+                class = typename std::enable_if< is_container<conteneur>::value >::type>
     double sum_valule (const Point& p , const conteneur& cont_centre_influence )
     {
 		return std::accumulate	(	cont_centre_influence.begin(),
@@ -175,7 +176,7 @@ namespace testSFML {
     }
 
 	template <  class conteneur ,
-                    class XX = typename std::enable_if< is_container<conteneur>::value >::type >
+				class = typename std::enable_if< is_container<conteneur>::value >::type >
     double sum_coef( const conteneur& cont_centre_influence )
     {
         return std::accumulate	(	cont_centre_influence.begin(),
@@ -196,10 +197,10 @@ namespace testSFML {
                 class PointRetour = sf::Vector2f,
                 class Point1 = sf::Vector2f,
                 class Point2 = sf::Vector2f,
-                class X =  typename std::enable_if< is_point<PointRetour>::value >::type,
-                class XX=  typename std::enable_if< is_point<Point1>::value >::type,
-                class XY=  typename std::enable_if< is_point<Point2>::value >::type,
-                class ZX = typename std::enable_if< is_container<conteneur>::value >::type>
+                class =  typename std::enable_if< is_point<PointRetour>::value >::type,
+                class =  typename std::enable_if< is_point<Point1>::value >::type,
+                class =  typename std::enable_if< is_point<Point2>::value >::type,
+                class = typename std::enable_if< is_container<conteneur>::value >::type>
     PointRetour random_point (const conteneur& cont_centre_influence, const Point1& p1,const Point2& p2)
     {
         PointRetour retour;
