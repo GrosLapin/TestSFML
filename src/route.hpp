@@ -5,12 +5,12 @@
 #include <vector> 
 
 #include "traits.hpp"
-
+#include "fonctions_math.hpp"
 
 namespace testSFML
 {
     template <class Point,
-             class X = typename std::enable_if< is_point<Point>::value >::type>
+             class = typename std::enable_if< is_point<Point>::value >::type>
     class route 
     {
         std::vector<Point> vec_point;
@@ -37,5 +37,16 @@ namespace testSFML
         }
         
     };
+	
+	
+	template < 	class Point, 
+				class Point2, 
+				class = typename std::enable_if< is_point<Point>::value >::type,
+				class = typename std::enable_if< is_point<Point2>::value >::type>
+	double angle_deg (const route<Point>& une_route, Point2 && point)
+	{
+		assert(une_route.size() >= 2 );
+		return angle_deg(*(une_route.end()-2),une_route.back(),std::forward<Point2>(point));
+	}
 }
 #endif
