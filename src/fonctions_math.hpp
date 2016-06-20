@@ -210,6 +210,7 @@ namespace testSFML {
         std::uniform_real_distribution<double> linear_rand (0,1);
 
 		bool fini = false;
+        
         while (!fini)
         {
             // on prend un point au piff dans l'interval
@@ -217,7 +218,11 @@ namespace testSFML {
 
             double value = sum_valule(new_point,cont_centre_influence);
 			double coef_total = sum_coef (cont_centre_influence);
-
+            if (coef_total == 0 )
+            {
+                retour = new_point;
+				fini = true;
+            }
 			if ( linear_rand(mt) < (value/coef_total))
 			{
 				retour = new_point;

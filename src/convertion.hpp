@@ -1,15 +1,17 @@
 #ifndef CONVERSION_HPP
 #define CONVERSION_HPP
 
-
+#include <sstream>
 #include "traits.hpp"
 
 namespace testSFML {
 
     template <class T>
     T convert_to(const std::string& str) {
-        static_assert(std::is_same<T,T>::value && false, "Conversion vers un type inconnu.");
-        return T();
+       std::stringstream ss(str);
+       T temp;
+       ss >> temp;
+       return temp;
     }
 
     template <>

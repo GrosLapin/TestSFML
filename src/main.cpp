@@ -17,6 +17,7 @@ int main(int argc, char** argv)
     gestion_option param(argc, argv);
     param.add("--ecart-type-centre","1");
     param.add("--ecart-type-maison","1");
+    param.add("--nb-centre",3);
     param.add("--nb-maison",1000);
     
     param.allow_raw_args(false);
@@ -24,75 +25,60 @@ int main(int argc, char** argv)
 
     double ecart_type_centre = param.get_val<double>("--ecart-type-centre");
     double ecart_type_maison = param.get_val<double>("--ecart-type-maison");
-    int nb_maison = param.get_val<int>("--nb-maison");
+    size_t nb_maison = param.get_val<size_t>("--nb-maison");
+    size_t nb_centre = param.get_val<size_t>("--nb-centre");
 
-    // creation des routes pour verifier que ça marche bien
-    vector<sf::VertexArray> vec_lignes;
-    vector<route<sf::Vector2f>> routes;
-    routes.emplace_back(sf::Vector2f(-5,-5));
-    routes.back().add({-10 , -20});
-    routes.back().add({-50 , -20});
-    
-    vec_lignes.push_back(create_lines(routes.back()));
-    
-    
     normal normal_centre(0,ecart_type_centre); // (default mean = zero, and standard deviation = unity)
     normal normal_maison(0,ecart_type_maison);
-
+    
     const int taille = 500;
     sf::RenderWindow window(sf::VideoMode(taille, taille), "SFML works!");
 	sf::View view1(window.getDefaultView());
 	window.setView(view1);
 
-	for (size_t i = 0; i < 10 ; i++ )
-	{
-		cout << random(0,360.0) << endl;
-	}
-
-   
-
-	std::vector<sf::ConvexShape> poly;
-	poly.emplace_back(create_polygone({ {0,0} , {0,taille} , {taille,taille}  , {taille,0}}));
-	poly.back().setFillColor(sf::Color::Transparent);
-	poly.back().setOutlineThickness(2);
-	poly.back().setOutlineColor(sf::Color(250, 150, 100));
-	std::vector <sf::Vector2f> points;
-
-
-    std::vector <sf::CircleShape> cercles;
-
-
+    
     std::vector<centre_influence<sf::Vector2f> > centres;
-    centre_influence<sf::Vector2f> test;
-    test.centre = sf::Vector2f(100,100);
-    test.repartition = normal_centre;
-    centres.push_back(test);
-
-
-    centres.push_back({sf::Vector2f(10,10),normal_centre});
-    centres.push_back({sf::Vector2f(200,200),normal_centre});
-
-    for (const auto& centre : centres )
+    std::vector <sf::CircleShape> cercles;
+    std::vector<sf::VertexArray> vec_lignes;
+    std::vector<route<sf::Vector2f>> routes;
+    std::vector<sf::ConvexShape> poly;
+        
+    for (size_t i = 0 ; i < nb_centre ; i++)
     {
+        // par defaut le coef est de 100
+        centres.push_back({ random_point(centres,{0,0},{taille,taille}) ,normal_centre});
         cercles.emplace_back(5);
-        cercles.back().setPosition(centre.centre);
+        cercles.back().setPosition(centres.back().centre);
     }
-
+    
     auto create_maison = [&] ()
     {
         cercles.emplace_back(2);
         cercles.back().setPosition(random_point(centres,{0,0},{taille,taille}));
         centres.push_back({cercles.back().getPosition(),normal_maison,1});
     };
-    for (int i= 0 ; i < nb_maison ; i ++ )
+    
+    for (size_t i= 0 ; i < nb_maison ; i ++ )
     {
         create_maison();
     }
-
     
     
+    // creation des routes pour verifier que ça marche bien
+    routes.emplace_back(sf::Vector2f(-5,-5));
+    routes.back().add({-10 , -20});
+    routes.back().add({-50 , -20});
+    vec_lignes.push_back(create_lines(routes.back()));
+    
+    // pour les test
+	std::vector <sf::Vector2f> points;    
     
     
+    // affichage d'une la zone de jeu
+    poly.emplace_back(create_polygone({ {0,0} , {0,taille} , {taille,taille}  , {taille,0}}));
+	poly.back().setFillColor(sf::Color::Transparent);
+	poly.back().setOutlineThickness(2);
+	poly.back().setOutlineColor(sf::Color(250, 150, 100));
     
     sf::Clock timer;
 

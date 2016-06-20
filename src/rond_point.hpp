@@ -24,6 +24,7 @@ namespace testSFML
 		rond_point(Point&& pos) 
 		{
 			centre = pos;
+                        // danger ne marche sans doute pas c'est le max théorique mais pas forcement dans mon cas
 			nb_route =random(min_route,(int)(360/min_angle));
 		}
 		
@@ -64,6 +65,30 @@ namespace testSFML
 			}
 			return true;
 		}
+		
+		
+		// sans doute pas top en therme de construction de code mais je sais pas par ou partir 
+		// donc je fais ça 
+		template <  class Conteneur,
+                    class = typename is_container<Conteneur>::type>        
+		void create_routes (Conteneur&& cont_points, double distance_max = 100)
+        {
+            // pour l'instant j'ia pas d'unité pour mes distance donc je me rends pas compte
+            static_assert(is_container<Conteneur>::value, "Le parametre n'est pas un conteneur");
+            static_assert(is_point<decltype (cont_points[0])>::value, "Le conteneur ne contient pas de point");
+            
+            for(const auto& p : cont_points)
+            {
+                if ( distance(centre,p) < distance_max && can_add_route(p) )
+                {
+                    create_route(p);
+                    if ( is_full () )
+                    {
+                      break;   
+                    }
+                }
+            }
+        }
 
 	};
 	template < 	class Point, 
@@ -72,8 +97,10 @@ namespace testSFML
 				class = typename std::enable_if< is_point<Point2>::value >::type>
 	bool is_angle_ok(const route<Point>& une_route, Point2 && point, double angles)
 	{
-		return angles < angle_deg(une_route,std::forward<Point2>(point));
+		return angles > angle_deg(une_route,std::forward<Point2>(point));
 	}
+	
+	
 }
 
 #endif
