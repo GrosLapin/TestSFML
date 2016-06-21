@@ -22,6 +22,8 @@ namespace testSFML
 		Point centre;
 	public : 
 		// et du coup pourquoi ça rond_point(Point&& pos)  ne marche pas ? 
+		// il n'y a pas de déduction de type automatique pour les constructeurs
+		// avant C++17
 		rond_point(const Point& pos) 
 		{
 			centre = pos;
@@ -29,7 +31,8 @@ namespace testSFML
 			nb_route =random(min_route,(int)(360/min_angle));
 		}
 		
-		rond_point(Point&& pos, Point&& premiere_route) 
+		// a voir si ça marche, mais je pense pas :/
+		rond_point(const Point& pos, Point&& premiere_route) 
 		{
 			centre = pos;
 			nb_route =random(min_route,(int)(360/min_angle));
