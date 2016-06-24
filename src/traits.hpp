@@ -8,6 +8,25 @@
 
 
 namespace testSFML {
+	
+	
+template <template<class...> class Traits, 
+		  class... T>
+struct are_all 
+{
+	static constexpr bool value = true;
+};
+
+
+template <template<class...> class Traits, 
+		  class TT,
+		  class... T>
+struct are_all <Traits,TT,T...>
+{
+	static constexpr bool value = Traits<TT>::value && are_all<Traits,T...>::value;
+};
+
+
 template<class T>
 struct void_if_valide {
     using type = void;

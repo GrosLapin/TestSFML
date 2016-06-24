@@ -41,7 +41,7 @@ namespace testSFML {
                     class PointFrom,
                     class X = typename std::enable_if< is_point<PointCible>::value >::type,
                     class W = typename std::enable_if< is_point<PointFrom>::value >::type>
-	PointCible convert_to (const PointFrom && from)
+	PointCible convert_to (const PointFrom & from)
 	{
 			using type_cible_x = decltype ( getX ( std::declval<PointCible>() ));
 			using type_cible_y = decltype ( getY ( std::declval<PointCible>() ));

@@ -160,6 +160,19 @@ namespace testSFML {
 			return coef * getGaussianValue(repartition,distance(centre,pt) / 100 ) ;
         }
     };
+	
+	/// IL faut changer le type de retour pour que ça soit generic
+	template <class T>
+	inline float getX(const centre_influence<T> & p ) 
+	{
+		return getX(p.centre);
+	}
+	
+	template <class T>
+	inline float getY(const centre_influence<T> & p ) 
+	{
+		return getY(p.centre);
+	}
 
 
     template <  class conteneur ,

@@ -7,4 +7,4 @@ cmake ..;
 make;
 cp $nom ../$nom
 cd ..
-./$nom
+./$nom $@
