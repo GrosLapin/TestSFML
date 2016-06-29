@@ -40,6 +40,11 @@ int main(int argc, char** argv)
     std::vector<centre_influence<sf::Vector2f> > centres;
     std::vector <sf::CircleShape> cercles;
     std::vector<sf::VertexArray> vec_lignes;
+	
+	// test 
+		std::vector<sf::Vector2f> test_vec = { {10,10}, {50, 60} };
+		vec_lignes.push_back(create_lines({test_vec[1],test_vec[0]}));
+	// fin test
     std::vector<route<sf::Vector2f>> routes;
     std::vector<sf::ConvexShape> poly;
         
@@ -128,8 +133,9 @@ int main(int argc, char** argv)
 			if ((event.type == sf::Event::MouseButtonPressed) && (event.mouseButton.button == sf::Mouse::Left))
             {
 
-				auto mousePos = convert_to<sf::Vector2f> ( sf::Mouse::getPosition(window) );
-				points.emplace_back(mousePos);
+				// = convert_to<sf::Vector2f> ( );
+				auto mousePos  = window.mapPixelToCoords( sf::Mouse::getPosition(window));
+				/*points.emplace_back(mousePos);
 				
 				if ( points.size() == 3 )
 				{
@@ -140,7 +146,9 @@ int main(int argc, char** argv)
 				{
 					vec_lignes.erase(vec_lignes.end()-1);
 					points.clear();	
-				}
+				}*/
+				std:: cout <<mousePos << std::endl;
+				std::cout << distance(test_vec[0],test_vec[1],mousePos) << std::endl<< std::endl<< std::endl;
 
 
             }
@@ -168,6 +176,8 @@ int main(int argc, char** argv)
             window.draw(circle);
         }
         
+        
+	
         // pas fou mais bon osef des perf now
         /*
         for ( const auto& rond : rond_points )

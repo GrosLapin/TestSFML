@@ -12,6 +12,7 @@
 #include <type_traits>
 #include <chrono>
 #include <numeric>
+#include <algorithm>
 #include <random>
 #include <cassert>
 #include <cmath>
@@ -20,7 +21,8 @@ namespace testSFML {
 	constexpr double PI = 3.141592653589793;
     using boost::math::normal; // typedef provides default type is double.
 
-    
+    using default_point = sf::Vector2f;
+	
 	template <class T, class U = void >
 	struct random_dispatch {
 		using distribution = typename std::uniform_int_distribution<T>;
@@ -28,7 +30,7 @@ namespace testSFML {
 
 	template <class T>
 	struct random_dispatch	<    T,
-								typename std::enable_if<std::is_floating_point<T>::value>::type
+								std::enable_if_t<std::is_floating_point<T>::value>
 							>  
 	{
 		using distribution = typename std::uniform_real_distribution<T>;
@@ -65,8 +67,8 @@ namespace testSFML {
 	 * **/
     template<   class Point,
                 class Point2, // on match le meme concept mais pas forcmeent la meme vrais classe
-                class = typename std::enable_if< is_point<Point>::value >::type,
-                class = typename std::enable_if< is_point<Point2>::value >::type
+                class = std::enable_if_t< is_point<Point>::value >,
+                class = std::enable_if_t< is_point<Point2>::value >
             >
     inline double distance ( Point&& p1,  Point2& p2)
     {
@@ -84,9 +86,9 @@ namespace testSFML {
     template < 	class Point,
 				class Point2,
 				class Point3,
-				class = typename std::enable_if< is_point<Point>::value >::type,
-				class = typename std::enable_if< is_point<Point2>::value >::type,
-				class = typename std::enable_if< is_point<Point3>::value >::type
+				class = std::enable_if_t< is_point<Point>::value >,
+				class = std::enable_if_t< is_point<Point2>::value >,
+				class = std::enable_if_t< is_point<Point3>::value >
 			 >
     inline double angle_rad ( Point&& p1,Point2&& centre,Point3&& p2)
 	{
@@ -110,9 +112,9 @@ namespace testSFML {
 	template < 	class Point,
 				class Point2,
 				class Point3,
-				class = typename std::enable_if< is_point<Point>::value >::type,
-				class = typename std::enable_if< is_point<Point2>::value >::type,
-				class = typename std::enable_if< is_point<Point3>::value >::type
+				class = std::enable_if_t< is_point<Point>::value >,
+				class = std::enable_if_t< is_point<Point2>::value >,
+				class = std::enable_if_t< is_point<Point3>::value >
 			>
 	inline double angle_deg ( Point&& p1,Point2&& centre,Point3&& p2)
 	{
@@ -132,9 +134,9 @@ namespace testSFML {
     template< class PointRetour = sf::Vector2f,
               class Point1 = sf::Vector2f,
               class Point2 = sf::Vector2f,
-              class =  typename std::enable_if< is_point<PointRetour>::value >::type,
-              class = typename std::enable_if< is_point<Point1>::value >::type,
-              class = typename std::enable_if< is_point<Point2>::value >::type
+              class =  std::enable_if_t< is_point<PointRetour>::value >,
+              class = std::enable_if_t< is_point<Point1>::value >,
+              class = std::enable_if_t< is_point<Point2>::value >
             >
     inline PointRetour random_point(const Point1& p1,const Point2& p2 )
     {
@@ -145,14 +147,14 @@ namespace testSFML {
 
 
     template <  class Point = sf::Vector2f,
-               class X = typename std::enable_if< is_point<Point>::value >::type>
+               class X = std::enable_if_t< is_point<Point>::value >>
     struct centre_influence
     {
         Point centre;
         normal repartition;
         double coef = 100 ;
         template <  class Point2 = sf::Vector2f,
-                    class WW = typename std::enable_if< is_point<Point2>::value >::type>
+                    class WW = std::enable_if_t< is_point<Point2>::value >>
         double getValue(const Point2 & pt) const
         {
             // la division par 100 est du que je réduit 100 pixel à "1" unité pour la gaussien,
@@ -186,9 +188,9 @@ namespace testSFML {
 	
 
     template <  class conteneur ,
-                class Point = sf::Vector2f,
-                class = typename std::enable_if< is_point<Point>::value >::type,
-                class = typename std::enable_if< is_container<conteneur>::value >::type>
+                class Point = default_point,
+                class = std::enable_if_t< is_point<Point>::value >,
+                class = std::enable_if_t< is_container<conteneur>::value >>
     double sum_valule (const Point& p , const conteneur& cont_centre_influence )
     {
 		return std::accumulate	(	cont_centre_influence.begin(),
@@ -199,7 +201,7 @@ namespace testSFML {
     }
 
 	template <  class conteneur ,
-				class = typename std::enable_if< is_container<conteneur>::value >::type >
+				class = std::enable_if_t< is_container<conteneur>::value > >
     double sum_coef( const conteneur& cont_centre_influence )
     {
         return std::accumulate	(	cont_centre_influence.begin(),
@@ -217,13 +219,13 @@ namespace testSFML {
 	 *
 	 **/
 	template <  class conteneur ,
-                class PointRetour = sf::Vector2f,
-                class Point1 = sf::Vector2f,
-                class Point2 = sf::Vector2f,
-                class =  typename std::enable_if< is_point<PointRetour>::value >::type,
-                class =  typename std::enable_if< is_point<Point1>::value >::type,
-                class =  typename std::enable_if< is_point<Point2>::value >::type,
-                class = typename std::enable_if< is_container<conteneur>::value >::type>
+                class PointRetour = default_point,
+                class Point1 = default_point,
+                class Point2 = default_point,
+                class =  std::enable_if_t< is_point<PointRetour>::value >,
+                class =  std::enable_if_t< is_point<Point1>::value >,
+                class =  std::enable_if_t< is_point<Point2>::value >,
+                class = std::enable_if_t< is_container<conteneur>::value >>
     PointRetour random_point (const conteneur& cont_centre_influence, const Point1& p1,const Point2& p2)
     {
         PointRetour retour;
@@ -254,6 +256,91 @@ namespace testSFML {
         }
         return retour;
     }
+    
+    
+    
+    
+	template<   class Point1,
+                class Point2, // on match le meme concept mais pas forcmeent la meme vrais classe
+                class =  std::enable_if_t< apply_on_all<is_point,Point1,Point2>::value >
+            >
+    inline double distance_carre ( Point1&& p1,  Point2& p2)
+    {
+        return pow (( getX(p1) ) - ( getX(p2) ), 2)+ pow (( getY(p1) ) - ( getY(p2) ), 2);
+
+    }
+    
+    
+    
+    // DANGER il faudrait que je vois comment gerer un point pas defautl constructible.
+    template <  class Point1 ,
+                class Point2 ,
+                class PointRetour = Point1,
+                class =  std::enable_if_t< apply_on_all<is_point,Point1,Point2,PointRetour>::value >
+			 >
+	PointRetour operator-(const Point1& p1, const Point2& p2) 
+	{
+		return PointRetour(getX(p1) - getX(p2) , getY(p1) - getY(p2) );
+	}
+	
+	template <  class Point1 ,
+				class Point2,
+				class PointRetour = Point1,
+				class =  std::enable_if_t< apply_on_all<is_point,Point1,Point2,PointRetour>::value >
+			>
+	PointRetour operator+(const Point1& p1, const Point2& p2) 
+	{
+		return PointRetour(getX(p1) + getX(p2) , getY(p1) + getY(p2) );
+	}
+	
+	template <  class Point1 ,
+				class N,
+				class PointRetour = Point1,
+		class =  std::enable_if_t< apply_on_all<is_point,Point1,PointRetour>::value >
+		>
+	PointRetour operator*(const N& value, const Point1& p1)
+	{
+		return PointRetour(getX(p1) * value , getY(p1) * value );
+	}
+	
+	template <  class Point1 ,
+				class N,
+				class PointRetour = Point1,
+				class =  std::enable_if_t< apply_on_all<is_point,Point1,PointRetour>::value >
+			>
+	PointRetour operator*( const Point1& p1,const N& value)
+	{
+		return PointRetour(getX(p1) * value , getY(p1) * value );
+	}
+	
+	
+	template <  class Point1 ,
+				class Point2,
+				class =  std::enable_if_t< apply_on_all<is_point,Point1,Point2>::value >
+			>
+	double dot(const Point1& p1, const Point2& p2) 
+	{
+		return getX(p1) * getX(p2)  + getY(p1) * getY(p2) ;
+	}
+
+  /// Faire une classe segment ? 
+	template <  class Point3 ,
+                class Point1 ,
+                class Point2 ,
+                class =  std::enable_if_t< apply_on_all<is_point,Point1,Point2,Point3>::value >
+			 >
+  double distance(const Point1& v, const Point2& w, const Point3& p) {
+		// Return minimum distance between line segment vw and point p
+		const double l2 = distance_carre(v, w);  // i.e. |w-v|^2 -  avoid a sqrt
+		if (l2 == 0.d) return distance(p, v);   // v == w case
+		// Consider the line extending the segment, parameterized as v + t (w - v).
+		// We find projection of point p onto the line. 
+		// It falls where t = [(p-v) . (w-v)] / |w-v|^2
+		// We clamp t from [0,1] to handle points outside the segment vw.
+		const double t = std::max(0.d, std::min(1.d, dot(p - v, w - v) / l2));
+		const default_point projection = v + t * (w - v);  // Projection falls on the segment
+		return distance(p, projection);
+	}
 
 }
 
