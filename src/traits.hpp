@@ -63,7 +63,7 @@ struct is_string<   T,
 
 			
 			
-template <class T>
+template <class T, class = void >
 struct is_map : std::false_type {};
 
 
@@ -74,6 +74,19 @@ struct is_map< std::map<T,U> >  : std::true_type {};
 template <class T, class U>
 struct is_map< std::unordered_map<T,U> >  : std::true_type {};
 
+
+/*
+template <template <class , class > class T, class = void >
+struct is_map : std::false_type {};
+template <template <class , class > class T, class Un, class Deux>
+struct is_map<   T,
+                typename void_if_valide<typename std::enable_if<
+                                                                std::is_same<T<Un,Deux>,std::map<Un,Deux>>::value ||
+                                                                std::is_same<T<Un,Deux>,std::unordered_map<Un,Deux>>::value 
+                                                                >::type
+                                        >::type
+            >  : std::true_type {};
+*/
 
 template <class T, class U = void, class V = void>
 struct is_point : std::false_type {
