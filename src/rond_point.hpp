@@ -107,8 +107,10 @@ namespace testSFML
             // pour l'instant j'ia pas d'unité pour mes distance donc je me rends pas compte
             static_assert(is_container<Conteneur1>::value, "centres n'est pas un conteneur");
             static_assert(is_container<Conteneur2>::value, "points n'est pas un conteneur");
-            static_assert(is_point<decltype (centres[0])>::value, "Le centres ne contient pas de point");
-            static_assert(is_point<decltype (points[0])>::value, "Le points ne contient pas de point");
+			constexpr bool is_map_c1 = is_map<Conteneur1>::value ;
+			constexpr bool is_map_c2 = is_map<Conteneur1>::value ;
+            static_assert(is_point<decltype (get_value<is_map_c1>(centres.begin()) )>::value, "Le centres ne contient pas de point");
+            static_assert(is_point<decltype (get_value<is_map_c2>(points.begin()) )>::value, "Le points ne contient pas de point");
 			
 			
 			// j'ai pas envie de faire end() -1 car je connais pas mon type d'iterateur
@@ -117,11 +119,11 @@ namespace testSFML
 				for (auto it = centres.begin() ; i < centres.size()-1 ; i++ , it = std::next(it) )
 				{
 					// ne marche pas partout, a corriger apres 
-					const auto& centre = get_value(it);
+					const auto& centre = get_value<is_map_c1>(it);
 					
 					for ( auto itj  = std::next(centres.begin(),(long int)(i+1)); itj != centres.end() ; itj = std::next(itj) )
 					{
-						const auto& other = get_value(itj);
+						const auto& other = get_value<is_map_c2>(itj);
 						if ( ! are_equals(centre,other) && distance(centre,other) < distance_max )
 						{
 							std::cout << centre << " ok avec " << other << std::endl;
@@ -131,7 +133,7 @@ namespace testSFML
 			}
 			
 			std::cout << "faire un test avec une map, et regarder pour faire map et unordered_map en une fois :/ " << std::endl;
-		
+
 			/*
 			std::vector<sf::Vector2f> vec_points_add;
 			if ( routes.empty() )

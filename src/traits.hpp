@@ -66,8 +66,6 @@ struct is_string<   T,
 template <class T, class = void >
 struct is_map : std::false_type {};
 
-
-
 template <class T, class U>
 struct is_map< std::map<T,U> >  : std::true_type {};
 

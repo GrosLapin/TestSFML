@@ -1,6 +1,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <typeinfo>
 #include "fonctions_grapiphiques.hpp"
 
 #include "fonctions_math.hpp"
@@ -75,7 +76,29 @@ int main(int argc, char** argv)
 																centres.end())		
 				 );
     
-   
+	map<int,sf::Vector2f> map_test;
+    for (int i = 0 ; i < nb_centre ; i++)
+	{
+		map_test[i] = centres[i].centre;
+	}
+		map<int,sf::Vector2f> map_test2;
+    for (int i = nb_centre ; i < centres.size() ; i++)
+	{
+		map_test2[i] = centres[i].centre;
+	}
+	 create_routes(map_test,map_test2 );
+	 cout << is_map< map<int,sf::Vector2f> >::value << endl;
+	 constexpr bool is_map_v = is_map< map<int,sf::Vector2f> >::value ;
+	 cout << get_value<is_map_v>(map_test.begin());
+	 exit(5);
+	/* cout << typeid(sf::Vector2f).name() << endl;
+	 cout << typeid(decltype (get_value(map_test.begin()))).name() << endl;
+
+    cout << is_point<decltype (get_value(map_test.begin()) )>::value << endl;
+	cout.flush();
+	cout << ":" <<endl;
+    */
+    
     
     // creation des routes pour verifier que ça marche bien
     routes.emplace_back(sf::Vector2f(-5,-5));
