@@ -26,6 +26,29 @@ namespace testSFML {
         }
         return chemin;
     }
+    
+	template<	class T,
+				class = std::enable_if_t < !is_map<T>::value >
+			>
+	auto& get_value (T& ite) { return *ite;}
+	
+	template<	class T,
+				class = std::enable_if_t < is_map<T>::value >,
+				class U = void
+			>
+	auto& get_value (T& ite) { return ite->second;}
+	
+	
+	template<	class T,
+				class = std::enable_if_t < !is_map<T>::value >
+			>
+	const auto& get_value (const T& ite) { return *ite;}
+	
+	template<	class T,
+				class = std::enable_if_t < !is_map<T>::value >,
+				class U = void
+			>
+	const auto& get_value (const T& ite) { return ite->second;}
 
 }
 #endif

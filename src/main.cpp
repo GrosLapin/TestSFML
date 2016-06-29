@@ -13,14 +13,6 @@ using namespace testSFML;
 using namespace std;
 int main(int argc, char** argv)
 {
-
-	cout << are_all<is_point,sf::Vector2f,sf::Vector2f,centre_influence<sf::Vector2f> >::value << endl;
-	cout << are_all<is_point,int,sf::Vector2f,sf::Vector2f,centre_influence<sf::Vector2f> >::value << endl;
-	cout << are_all<is_point,sf::Vector2f,sf::Vector2f,centre_influence<sf::Vector2f>,double >::value << endl;
-
-		
-		
-	exit(3);
 	
     gestion_option param(argc, argv);
     param.add("--ecart-type-centre","1");
@@ -71,27 +63,14 @@ int main(int argc, char** argv)
         create_maison();
     }
     
-    // test des ronds point et des routes 
-    std::vector<rond_point<centre_influence<sf::Vector2f>>> rond_points;
-    for(size_t i = 0 ; i < nb_centre ; i++ )
-    {
-        rond_points.push_back(rond_point<centre_influence<sf::Vector2f>>(centres[i]));
-		rond_points.back().create_routes(centres);
-		/*for (auto & route : rond_points.back().getRoutes() )
-		{
-			while ( route.prolonge(centres) ){
-				std::cout << route.size() << endl;
-			}
-		}*/
-    }
     
+    create_routes(std::vector<centre_influence<sf::Vector2f> >( centres.begin(),
+																centres.begin()+ (long int)nb_centre) ,
+			      std::vector<centre_influence<sf::Vector2f> >( centres.begin()+ (long int)nb_centre,
+																centres.end())		
+				 );
     
-    std::cout << "le rond point 1 à " << rond_points[0].getRoutes().size()<< std::endl;
-	
-	for ( const auto & routes :  rond_points[0].getRoutes() )
-	{
-		std::cout << "taille de la route : " << routes.size() << std::endl;
-	}
+   
     
     // creation des routes pour verifier que ça marche bien
     routes.emplace_back(sf::Vector2f(-5,-5));
@@ -190,13 +169,14 @@ int main(int argc, char** argv)
         }
         
         // pas fou mais bon osef des perf now
+        /*
         for ( const auto& rond : rond_points )
 		{
 			for (const auto route : rond.getRoutes() )
 			{
 				window.draw(create_lines(route));
 			}
-		}
+		}*/
 
         window.display();
 		temps =  (float)timer.getElapsedTime().asSeconds ();

@@ -174,6 +174,16 @@ namespace testSFML {
 		return getY(p.centre);
 	}
 
+	
+	template <class T,
+			  class U,
+			  class = std::enable_if_t<apply_on_all<is_point,U,T>::value>
+			 >
+	inline bool are_equals(const T& point1,const U& point2) 
+	{
+		return ( getY(point1) == getY(point2) ) &&  ( getX(point1) == getX(point2) );
+	}
+	
 
     template <  class conteneur ,
                 class Point = sf::Vector2f,

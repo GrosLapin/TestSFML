@@ -5,14 +5,14 @@
 #include <vector>
 #include <typeinfo>
 #include <utility>
-
-
+#include <map>
+#include <unordered_map>
 namespace testSFML {
 	
 	
 template <template<class...> class Traits, 
 		  class... T>
-struct are_all 
+struct apply_on_all 
 {
 	static constexpr bool value = true;
 };
@@ -21,9 +21,9 @@ struct are_all
 template <template<class...> class Traits, 
 		  class TT,
 		  class... T>
-struct are_all <Traits,TT,T...>
+struct apply_on_all <Traits,TT,T...>
 {
-	static constexpr bool value = Traits<TT>::value && are_all<Traits,T...>::value;
+	static constexpr bool value = Traits<TT>::value && apply_on_all<Traits,T...>::value;
 };
 
 
@@ -61,7 +61,18 @@ struct is_string<   T,
                                         >::type
             >  : std::true_type {};
 
+			
+			
+template <class T>
+struct is_map : std::false_type {};
 
+
+
+template <class T, class U>
+struct is_map< std::map<T,U> >  : std::true_type {};
+
+template <class T, class U>
+struct is_map< std::unordered_map<T,U> >  : std::true_type {};
 
 
 template <class T, class U = void, class V = void>

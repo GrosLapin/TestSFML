@@ -79,21 +79,60 @@ namespace testSFML
 		}
 		
 		
-		// sans doute pas top en therme de construction de code mais je sais pas par ou partir 
+
+
+	};
+	template < 	class Point, 
+				class Point2, 
+				class = typename std::enable_if< is_point<Point>::value >::type,
+				class = typename std::enable_if< is_point<Point2>::value >::type>
+	bool is_angle_ok(const route<Point>& une_route, Point2 && point, double angles)
+	{
+		std::cout << *(une_route.begin()) << "  "<< *(une_route.begin()+1) << " " << point  << " anglge : " << angle_deg(*(une_route.begin()),*(une_route.begin()+1),point);
+		std::cout << "   is : " << (angles > angle_deg(*(une_route.begin()),*(une_route.begin()+1),point)) << std::endl;
+		return angles > angle_deg(*(une_route.begin()),*(une_route.begin()+1),std::forward<Point2>(point));
+	}
+	
+	
+	
+			// sans doute pas top en therme de construction de code mais je sais pas par ou partir 
 		// donc je fais ça 
-		template <  class Conteneur,
-                    class = typename is_container<Conteneur>::type>        
-		void create_routes (const Conteneur& cont_points, double distance_max = 1000)
+		template <  class Conteneur1,
+                    class Conteneur2
+				 >        
+		void create_routes (const  Conteneur1& centres,
+							const  Conteneur2&  points ,
+					        double distance_max = 1000)
         {
             // pour l'instant j'ia pas d'unité pour mes distance donc je me rends pas compte
-            static_assert(is_container<Conteneur>::value, "Le parametre n'est pas un conteneur");
-            static_assert(is_point<decltype (cont_points[0])>::value, "Le conteneur ne contient pas de point");
-            
+            static_assert(is_container<Conteneur1>::value, "centres n'est pas un conteneur");
+            static_assert(is_container<Conteneur2>::value, "points n'est pas un conteneur");
+            static_assert(is_point<decltype (centres[0])>::value, "Le centres ne contient pas de point");
+            static_assert(is_point<decltype (points[0])>::value, "Le points ne contient pas de point");
 			
-			std::cout << centre << std::endl;
 			
+			// j'ai pas envie de faire end() -1 car je connais pas mon type d'iterateur
+			{
+				size_t i = 0 ;
+				for (auto it = centres.begin() ; i < centres.size()-1 ; i++ , it = std::next(it) )
+				{
+					// ne marche pas partout, a corriger apres 
+					const auto& centre = get_value(it);
+					
+					for ( auto itj  = std::next(centres.begin(),(long int)(i+1)); itj != centres.end() ; itj = std::next(itj) )
+					{
+						const auto& other = get_value(itj);
+						if ( ! are_equals(centre,other) && distance(centre,other) < distance_max )
+						{
+							std::cout << centre << " ok avec " << other << std::endl;
+						}
+					}
+				}
+			}
+			
+			std::cout << "faire un test avec une map, et regarder pour faire map et unordered_map en une fois :/ " << std::endl;
 		
-			
+			/*
 			std::vector<sf::Vector2f> vec_points_add;
 			if ( routes.empty() )
 			{
@@ -101,7 +140,7 @@ namespace testSFML
 				vec_points_add.push_back(convert_to<sf::Vector2f>(cont_points[indice]));
 				std::cout  << vec_points_add.back()  << std::endl << " _____________" << std::endl;
  				create_route(cont_points[indice]);
-			}
+			}*/
 			/*else
 			{
 				for(const auto& p : cont_points)
@@ -123,20 +162,7 @@ namespace testSFML
 				}
 			}*/
 		}
-
-	};
-	template < 	class Point, 
-				class Point2, 
-				class = typename std::enable_if< is_point<Point>::value >::type,
-				class = typename std::enable_if< is_point<Point2>::value >::type>
-	bool is_angle_ok(const route<Point>& une_route, Point2 && point, double angles)
-	{
-		std::cout << *(une_route.begin()) << "  "<< *(une_route.begin()+1) << " " << point  << " anglge : " << angle_deg(*(une_route.begin()),*(une_route.begin()+1),point);
-		std::cout << "   is : " << (angles > angle_deg(*(une_route.begin()),*(une_route.begin()+1),point)) << std::endl;
-		return angles > angle_deg(*(une_route.begin()),*(une_route.begin()+1),std::forward<Point2>(point));
-	}
-	
-	
+		
 }
 
 #endif
