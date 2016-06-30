@@ -8,10 +8,32 @@
 #include <fstream>
 
 #include "fonction_string.hpp"
+#include "traits.hpp"
 
 namespace testSFML {
 
 
+    template <class T, class U>
+    bool contain (T&& conteneur1,  U&& conteneur2)
+    {
+        if ( conteneur1.size() < conteneur2.size() ) { return false;}
+        bool ok = true;
+        for ( auto it = conteneur2.begin() ; it != conteneur2.end() && ok ; it++ )
+        {
+            ok = (std::find(conteneur1.begin(),conteneur1.end(),(*it)) != conteneur1.end());
+            #define DEBUG false
+            #if DEBUG_IF
+            if ( not ok)
+            {
+                debugln(conteneur1, "\nne contient pas \n",conteneur2);
+                debugln("à cause de :" ,(*it) );
+            }
+            #endif // DEBUG_IF
+        }
+        return ok;
+    }
+    
+    
     inline bool file_exists(std::string const & pathname)
     {
         std::ifstream f(pathname);

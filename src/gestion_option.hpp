@@ -50,7 +50,7 @@ class gestion_option
 		void check_can_add () const {
 			if ( ! can_add_param )
 			{
-				std::cerr << "On ne peut pas faire de .add(..) apres avoir fait un .get_val " << std::endl;
+				std::cerr << "On ne peut pas faire de .add(..) apres avoir fait un .get_val, utiliser get_val_unsafe si besoin" << std::endl;
 				exit(5);
 			}
 		}
@@ -64,6 +64,8 @@ class gestion_option
         std::vector<std::pair<std::string,std::string>> vec_option_default, vec_option_fichier;
         std::vector<std::string> vec_option;
 
+        /// TODO : le fair pour autre chose que des strings
+        std::map < std::string , std::vector < std::string >> map_option_valide_value;
 
         bool hasSeparateur (std::string param)
         {
@@ -90,6 +92,8 @@ class gestion_option
 
         //fonction qui empeche de croire qu'on a mis un param alors qu'on a fait une faute de frappe :D
         inline void check_typo() const {
+            
+            // check des option 
             for (auto opt : vec_args_named ) {
 
                auto if_defaut = std::find_if(vec_option_default.begin(), vec_option_default.end() , [&](auto paire) { return paire.first == opt.id ;} );
@@ -99,8 +103,23 @@ class gestion_option
                    erreur ("L'option \"" + opt.id + "\" n'est pas prévu par le programme.");
                }
             }
+            
+            // check du fichier
+            for (auto opt : vec_option_fichier ) {
+
+               auto if_defaut = std::find_if(vec_option_default.begin(), vec_option_default.end() , [&](auto paire) { return paire.first == opt.first ;} );
+               if ( if_defaut == vec_option_default.end() &&
+                    std::find(vec_option.begin(),vec_option.end(),opt.first) == vec_option.end() )
+               {
+                   erreur ("L'option \"" + opt.first + "\" n'est pas prévu par le programme.");
+               }
+            }
         }
+        
+        // pour les options ayant une range
     
+        // un peut comme help on peut taper --generate pour generer des fichiers de param 
+        // avec les valeurs par defaut
         inline void generate () const {
             if ( generate_file ) {
                 std::ofstream flux (nomProgramme+".param");
@@ -175,7 +194,6 @@ class gestion_option
 
         };
         
-        
         // ne retourne pas d'erreur si le fichier n'existe pas, si ça se trouve c'est volontaire et 
         // les options sont deja passé en param
         inline void load_file (const std::string& file, bool assert_file_valide = false)
@@ -234,6 +252,29 @@ class gestion_option
             }
         }
 
+        template<class T = std::string>
+        inline T get_raw_val(size_t id){
+            check_help();
+            generate ();
+            if ( id < vec_args_raw.size() ){
+                erreur("vous avez demandez l'indice " + std::to_string(id) + " alors qu'il n'y a que " + std::to_string(vec_args_raw.size()) + " params");
+            }
+            return convert_to<T>(vec_args_raw[id]);
+        }
+
+        inline void allow_raw_args(bool allow)
+        {
+            if (not allow and vec_args_raw.size() > 0 )
+            {
+                erreur("Le programme ne prend pas de parametre libre" );
+            }
+        }
+
+        inline std::vector<std::string> get_raw_args (){
+            check_help();
+            generate ();
+            return vec_args_raw;
+        }
 
         inline void mustBeValideFile(const std::vector<std::string>& listTag) const
         {
@@ -255,26 +296,43 @@ class gestion_option
             }
         }
 
-
         template<class T,
                  class U = typename std::enable_if< !is_string<T>::value >::type,
                  class V = decltype(std::to_string(std::declval<T>())) >
-        inline void add(std::string option, T defaultVal)
+        inline void add(const std::string& option, const T& defaultVal)
         {
 			check_can_add ();
             vec_option_default.push_back({option,std::to_string(defaultVal)});
         }
-        inline void add(std::string option, std::string defaultVal)
+        
+        inline void add(const std::string& option, const std::string& defaultVal)
         {
 			check_can_add ();
             vec_option_default.push_back({option,defaultVal});
         }
-        inline void add(std::string option)
+        
+        inline void add(const std::string& option)
         {
 			check_can_add ();
             vec_option.push_back(option);
         }
+        
+        template<   class Conteneur,
+                    class = std::enable_if_t<is_container<Conteneur>::value> 
+                 >
+        inline void add (const std::string& option, const Conteneur& conteneur)
+        {
+            static_assert(is_string<decltype(*conteneur.begin())>::value , "La version actuelle ne prend que des strings :/");
+            check_can_add ();
+            vec_option.push_back(option);
+            map_option_valide_value[option].insert  (   map_option_valide_value[option].begin(),
+                                                        conteneur.begin(),
+                                                        conteneur.end()
+                                                    );
+        }
 
+        
+        // permet d'avoir une valeur avant la fin de la lecture des params
         template<class T = std::string>
         inline T get_val_unsafe(const std::string& id) const {
 			check_help();
@@ -284,6 +342,7 @@ class gestion_option
             auto it = std::find(vec_args_named.begin(), vec_args_named.end(), id);
             if ( it != vec_args_named.end() ) 
             {
+                
                 // si oui il a la priorité 
                 return convert_to<T>(it->valeur);
             }
@@ -311,36 +370,13 @@ class gestion_option
             // j'ai du inverser la logique pour que le compilateur ne stress pas de ne pas avoir de retour;
             return convert_to<T>(if_defaut->second);
 		}
+        
         template<class T = std::string>
         inline T get_val(const std::string& id)  {
 			check_typo();
 			can_add_param =false;
 			return get_val_unsafe<T>(id);
             
-        }
-
-        inline std::string get_raw_val(size_t id){
-            check_help();
-            generate ();
-            if ( id < vec_args_raw.size() ){
-                erreur("vous avez demandez l'indice " + std::to_string(id) + " alors qu'il n'y a que " + std::to_string(vec_args_raw.size()) + " params");
-            }
-            return vec_args_raw[id];
-        }
-
-        inline void allow_raw_args(bool allow)
-        {
-            if (not allow and vec_args_raw.size() > 0 )
-            {
-                erreur("Le programme ne prend pas de parametre libre" );
-            }
-        }
-
-
-        inline std::vector<std::string> get_raw_args (){
-            check_help();
-            generate ();
-            return vec_args_raw;
         }
 
         inline std::string usage() const {
