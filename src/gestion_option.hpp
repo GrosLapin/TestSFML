@@ -116,7 +116,15 @@ class gestion_option
             }
         }
         
-        // pour les options ayant une range
+        // pour les options ayant une list de valeur, on verifi qu'on est bon 
+        inline void check_liste_value (const std::string & value )
+        {
+            if ( map_option_valide_value.find(value) != map_option_valide_value.end () )
+            {
+                if 
+                
+            }
+        }
     
         // un peut comme help on peut taper --generate pour generer des fichiers de param 
         // avec les valeurs par defaut
