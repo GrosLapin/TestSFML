@@ -125,7 +125,7 @@ class gestion_option
 				
                 if ( ! contain ( map_option_valide_value[id] , value ) )
 				{
-					erreur ("L'option \"" + id + "\" n'est pas dans les valeurs possible : " + to_string_martin (map_option_valide_value[id]) );
+					erreur ("L'option \"" + id + "\" n'est pas dans les valeurs possible : " + to_string (map_option_valide_value[id]) );
 				}
 				
                 

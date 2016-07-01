@@ -11,11 +11,14 @@
 #include "rond_point.hpp"
 
 using namespace testSFML;
-using namespace std;
+using std::cout;
+using std::endl;
+using std::map;
+using std::vector;
 int main(int argc, char** argv)
 {
 	
-	
+
     gestion_option param(argc, argv);
     param.add("--ecart-type-centre","1");
     param.add("--ecart-type-maison","1");

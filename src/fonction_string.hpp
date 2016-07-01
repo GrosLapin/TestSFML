@@ -13,7 +13,39 @@
 #include <cctype>
 
 
+#include "traits.hpp"
 
+namespace testSFML {
+	
+		template<
+			class T,
+			class V = typename std::enable_if< is_container<T>::value >::type,
+			class U = typename std::enable_if< !is_string<T>::value >::type
+		>
+		inline std::ostream & operator<< (std::ostream& out, const T& container)
+		{
+			for (const auto& val : container)
+			{
+			out << val << " " ;
+			}
+			return out;
+		}
+
+
+
+
+		template<   class Point,
+					class V = typename std::enable_if< is_point<Point>::value >::type
+				>
+		inline std::ostream& operator<< (std::ostream& out, const Point& p)
+		{
+
+			out << "(" << getX(p)  << "," << getY(p) << ")" ;
+
+			return out;
+		}
+		
+		
 // la version ou  la limite est un string;
 // l'entre est prise en copie, on peut l'utiliser directement
 // la limite n'est pas modifiée.
@@ -40,7 +72,7 @@ inline std::vector<std::string>  decoupe (const std::string& chaine, const char*
 }
 
 
-
+}
 /*
 // decoupe avec plusieurs ligmite
 inline std::vector<std::string> decoupe (std::string entre,std::vector<std::string> limites)

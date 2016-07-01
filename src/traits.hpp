@@ -36,6 +36,19 @@ struct void_if_valide {
     using type = void;
 };
 
+template<class T>
+using void_if_valide_t = typename void_if_valide<T>::type;
+
+
+
+template<class T>
+struct true_if_valide 
+{
+	static constexpr bool value = true;
+};
+
+
+
 
 template <class T, class U = void, class V = void , class W = void>
 struct is_container : std::false_type {};
@@ -49,6 +62,21 @@ struct is_container<    T,
 
 
 
+					
+					
+					
+
+template <class T, class U = void >
+struct std_to_stringable : std::false_type {};
+
+template <class T>
+struct std_to_stringable<   T,
+							void_if_valide_t <decltype( std::to_string( std::declval<T>() ))>
+						>  : std::true_type {};
+
+template<class T>
+using std_to_stringable_t = typename std_to_stringable<T>::type;
+					
 
 template <class T, class U = void>
 struct is_string : std::false_type {};

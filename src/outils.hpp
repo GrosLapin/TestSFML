@@ -15,33 +15,6 @@
 namespace testSFML {
 
 
-	template<
-			class T,
-			class V = typename std::enable_if< is_container<T>::value >::type,
-			class U = typename std::enable_if< !is_string<T>::value >::type
-		>
-		std::ostream& operator<< (std::ostream& out, const T& container)
-		{
-			for (const auto& val : container)
-			{
-			out << val << " " ;
-			}
-			return out;
-		}
-
-
-
-
-		template<   class Point,
-					class V = typename std::enable_if< is_point<Point>::value >::type
-				>
-		inline std::ostream& operator<< (std::ostream& out, const Point& p)
-		{
-
-			out << "(" << getX(p)  << "," << getY(p) << ")" ;
-
-			return out;
-		}
 
 
     template <	class T, class U,

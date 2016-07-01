@@ -5,8 +5,9 @@
 
 #include <boost/math/distributions/normal.hpp> // for normal_distribution
 
-#include "fonctions_grapiphiques.hpp"
 #include "traits.hpp"
+#include "fonctions_grapiphiques.hpp"
+
 #include "convertion.hpp"
 
 #include <type_traits>
@@ -36,7 +37,7 @@ namespace testSFML {
 		using distribution = typename std::uniform_real_distribution<T>;
 		
 	};
-    // DANGER il semblerait que ça marche int int :D
+    //  ça marche int int :D
     // je me fout du std forward parce que ça sera de type double int... et dans tous les cas
     // un forward sur un type base c'est une copie
     template < class N,

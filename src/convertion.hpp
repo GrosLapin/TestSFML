@@ -3,55 +3,72 @@
 
 #include <sstream>
 #include "traits.hpp"
-
+#include "fonction_string.hpp"
 
 namespace testSFML {
 
-		template<
-			class T,
-			class V = typename std::enable_if< is_container<T>::value >::type,
-			class U = typename std::enable_if< !is_string<T>::value >::type
-		>
-		inline std::stringstream& operator<< (std::stringstream& out, const T& container)
-		{
-			for (const auto& val : container)
-			{
-			out << val << " " ;
-			}
-			return out;
-		}
-
-
-
-
-		template<   class Point,
-					class V = typename std::enable_if< is_point<Point>::value >::type
-				>
-		inline std::stringstream& operator<< (std::stringstream& out, const Point& p)
-		{
-
-			out << "(" << getX(p)  << "," << getY(p) << ")" ;
-
-			return out;
-		}
-		
-	/// TODO revoir pour pourvoir faire du X v Y si possible
-	// Question pourquoi je peux pas juste faire 
-	/*
-	 * 
-	 * std::stringstream ss();
-	   std::ostream o;
-	   ss << o <<  t;
-	   return ss.str();
-	 * 
-	 * 
-	 */
-	template <class T>
-	std::string to_string_martin(const T& t) {
-       std::stringstream ss();
+	
+	
+	
+	// because magic !
+	
+	template <	class T	 >
+	auto to_string(const T& t) -> std::enable_if_t<	std_to_stringable_t<T>::value ,
+													std::string > 
+	{
+      return std::to_string(t);
+    }
+    
+    template <	class T	 >
+	std::enable_if_t<	! std_to_stringable_t<T>::value ,
+						std::string
+					> to_string(const T& t) {
+       std::stringstream ss;
 	   ss  <<  t;
 	   return ss.str();
     }
+	
+	/*
+	template <	class T	 , 
+				class =   std::enable_if_t<	std_to_stringable_t<T>::value >,
+				class = void
+			>
+	std::string to_string(const T& t)
+	{
+      return std::to_string(t);
+    }
+    
+    template <	class T	 ,
+				class =   std::enable_if_t<	! std_to_stringable_t<T>::value >
+			 >
+	std::string to_string(const T& t) {
+       std::stringstream ss;
+	   ss  <<  t;
+	   return ss.str();
+    }
+    */
+    
+	/*
+	template <	class T	 >
+	std::string to_string(T const & t, std::true_type) { return std::to_string(t); }
+	
+	template <	class T	 >
+	std::string to_string(T const & t, std::false_type)
+	{
+       std::stringstream ss;
+	   ss  <<  t;
+	   return ss.str();
+	}
+	
+	template <	class T	 >
+	std::string to_string(T const & t)
+	{
+		return to_string(t, std_to_stringable_t<T>());
+	}
+	
+	to_string(5);
+	*/
+    
 	
     template <class T>
     T convert_to(const std::string& str) {
