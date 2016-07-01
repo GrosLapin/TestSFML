@@ -27,6 +27,10 @@ struct apply_on_all <Traits,TT,T...>
 };
 
 
+template <template<class...> class Traits, 
+		  class... T>
+using enable_if_all_t = std::enable_if_t < apply_on_all<Traits,T...>::value >;
+
 template<class T>
 struct void_if_valide {
     using type = void;

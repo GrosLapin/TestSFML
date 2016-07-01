@@ -15,6 +15,7 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	
+	
     gestion_option param(argc, argv);
     param.add("--ecart-type-centre","1");
     param.add("--ecart-type-maison","1");
@@ -76,13 +77,13 @@ int main(int argc, char** argv)
 																centres.end())		
 				 );
     
-	map<int,sf::Vector2f> map_test;
-    for (int i = 0 ; i < nb_centre ; i++)
+	map<size_t,sf::Vector2f> map_test;
+    for (size_t i = 0 ; i < nb_centre ; i++)
 	{
 		map_test[i] = centres[i].centre;
 	}
-		map<int,sf::Vector2f> map_test2;
-    for (int i = nb_centre ; i < centres.size() ; i++)
+	map<size_t,sf::Vector2f> map_test2;
+    for (size_t i = nb_centre ; i < centres.size() ; i++)
 	{
 		map_test2[i] = centres[i].centre;
 	}

@@ -1,7 +1,9 @@
 #ifndef OUITLS_HPP
 #define OUITLS_HPP
 
+
 #include <iostream>
+#include <algorithm>
 #include <vector>
 #include <typeinfo>
 #include <utility>
@@ -13,25 +15,60 @@
 namespace testSFML {
 
 
-    template <class T, class U>
-    bool contain (T&& conteneur1,  U&& conteneur2)
+	template<
+			class T,
+			class V = typename std::enable_if< is_container<T>::value >::type,
+			class U = typename std::enable_if< !is_string<T>::value >::type
+		>
+		std::ostream& operator<< (std::ostream& out, const T& container)
+		{
+			for (const auto& val : container)
+			{
+			out << val << " " ;
+			}
+			return out;
+		}
+
+
+
+
+		template<   class Point,
+					class V = typename std::enable_if< is_point<Point>::value >::type
+				>
+		inline std::ostream& operator<< (std::ostream& out, const Point& p)
+		{
+
+			out << "(" << getX(p)  << "," << getY(p) << ")" ;
+
+			return out;
+		}
+
+
+    template <	class T, class U,
+				class = enable_if_all_t <is_container, T, U >,
+				class = std::enable_if_t<!is_string<U>::value>,
+				class = void				
+			>
+    bool contain (const T& conteneur1,  const U& conteneur2)
     {
         if ( conteneur1.size() < conteneur2.size() ) { return false;}
         bool ok = true;
         for ( auto it = conteneur2.begin() ; it != conteneur2.end() && ok ; it++ )
         {
             ok = (std::find(conteneur1.begin(),conteneur1.end(),(*it)) != conteneur1.end());
-            #define DEBUG false
-            #if DEBUG_IF
-            if ( not ok)
-            {
-                debugln(conteneur1, "\nne contient pas \n",conteneur2);
-                debugln("à cause de :" ,(*it) );
-            }
-            #endif // DEBUG_IF
         }
         return ok;
     }
+    
+    template < class T,
+			   class U, 
+			   class = std::enable_if_t <is_container<T>::value>
+			 >
+	bool contain (const T& conteneur1 , const U& value)
+	{
+		static_assert(!is_map<T>::value, "je n'ai pas encore fait la version pour les map");
+		return std::find(conteneur1.begin(), conteneur1.end(), value) != conteneur1.end();
+	}
     
     
     inline bool file_exists(std::string const & pathname)

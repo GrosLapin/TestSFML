@@ -300,7 +300,10 @@ namespace testSFML {
 		>
 	PointRetour operator*(const N& value, const Point1& p1)
 	{
-		return PointRetour(getX(p1) * value , getY(p1) * value );
+		// Est ce la bonne solution ? 
+		using typeXpoint1 = decltype(getX(p1));
+		using typeYpoint1 = decltype(getY(p1));
+		return PointRetour(getX(p1) * (typeXpoint1)value ,  getY(p1) * (typeYpoint1) value);
 	}
 	
 	template <  class Point1 ,

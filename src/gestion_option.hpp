@@ -117,11 +117,17 @@ class gestion_option
         }
         
         // pour les options ayant une list de valeur, on verifi qu'on est bon 
-        inline void check_liste_value (const std::string & value )
+        inline void check_liste_value (const std::string & id , const std::string & value)
         {
-            if ( map_option_valide_value.find(value) != map_option_valide_value.end () )
-            {
-                if 
+            if ( map_option_valide_value.find(id) != map_option_valide_value.end () )
+            { 
+				// TODO a faire proprement
+				
+                if ( ! contain ( map_option_valide_value[id] , value ) )
+				{
+					erreur ("L'option \"" + id + "\" n'est pas dans les valeurs possible : " + to_string_martin (map_option_valide_value[id]) );
+				}
+				
                 
             }
         }

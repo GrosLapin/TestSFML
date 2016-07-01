@@ -4,8 +4,55 @@
 #include <sstream>
 #include "traits.hpp"
 
+
 namespace testSFML {
 
+		template<
+			class T,
+			class V = typename std::enable_if< is_container<T>::value >::type,
+			class U = typename std::enable_if< !is_string<T>::value >::type
+		>
+		inline std::stringstream& operator<< (std::stringstream& out, const T& container)
+		{
+			for (const auto& val : container)
+			{
+			out << val << " " ;
+			}
+			return out;
+		}
+
+
+
+
+		template<   class Point,
+					class V = typename std::enable_if< is_point<Point>::value >::type
+				>
+		inline std::stringstream& operator<< (std::stringstream& out, const Point& p)
+		{
+
+			out << "(" << getX(p)  << "," << getY(p) << ")" ;
+
+			return out;
+		}
+		
+	/// TODO revoir pour pourvoir faire du X v Y si possible
+	// Question pourquoi je peux pas juste faire 
+	/*
+	 * 
+	 * std::stringstream ss();
+	   std::ostream o;
+	   ss << o <<  t;
+	   return ss.str();
+	 * 
+	 * 
+	 */
+	template <class T>
+	std::string to_string_martin(const T& t) {
+       std::stringstream ss();
+	   ss  <<  t;
+	   return ss.str();
+    }
+	
     template <class T>
     T convert_to(const std::string& str) {
        std::stringstream ss(str);
