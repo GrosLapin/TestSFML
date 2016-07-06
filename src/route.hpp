@@ -4,8 +4,8 @@
 
 #include <vector> 
 
-#include "traits.hpp"
-#include "fonctions_math.hpp"
+#include "outils/traits.hpp"
+#include "outils/fonctions_math.hpp"
 
 namespace testSFML
 {

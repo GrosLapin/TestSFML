@@ -6,9 +6,21 @@
 #include <stdexcept>
 #include <stdlib.h>     /* atof */
 
-#include "fonction_string.hpp"
 #include "outils.hpp"
+
+#include "fonction_conteneur.hpp"
+
+
 #include "convertion.hpp"
+
+
+
+
+#include <boost/core/demangle.hpp>
+#include <typeinfo>
+#include <iostream>
+
+
 
 
 namespace testSFML {
@@ -117,18 +129,11 @@ class gestion_option
         }
         
         // pour les options ayant une list de valeur, on verifi qu'on est bon 
-        inline void check_liste_value (const std::string & id , const std::string & value)
+        inline void check_liste_value (const std::string & id , const std::string & value) const
         {
-            if ( map_option_valide_value.find(id) != map_option_valide_value.end () )
-            { 
-				// TODO a faire proprement
-				
-                if ( ! contain ( map_option_valide_value[id] , value ) )
-				{
-					erreur ("L'option \"" + id + "\" n'est pas dans les valeurs possible : " + to_string (map_option_valide_value[id]) );
-				}
-				
-                
+            if ( contain_key ( map_option_valide_value , id)  and not contain ( map_option_valide_value.at(id) , value ) )
+            {
+                erreur ("L'option \"" + id + "\" n'est pas dans les valeurs possible : " + to_string (map_option_valide_value.at(id)));
             }
         }
     
@@ -331,18 +336,22 @@ class gestion_option
             vec_option.push_back(option);
         }
         
-        template<   class Conteneur,
+        template<   class Conteneur = std::vector<std::string>,
                     class = std::enable_if_t<is_container<Conteneur>::value> 
                  >
         inline void add (const std::string& option, const Conteneur& conteneur)
         {
-            static_assert(is_string<decltype(*conteneur.begin())>::value , "La version actuelle ne prend que des strings :/");
+            using boost::core::demangle;
+            
+            std::cout << typeid(get_value<Conteneur>(conteneur.begin())).name()  << " " << demangle ( typeid(get_value<Conteneur>(conteneur.begin())).name() ) << std::endl;
+             std::cout << typeid(std::string).name() << " "<< demangle ( typeid(std::string).name() ) << std::endl;
+             std::cout << is_string<decltype(get_value<Conteneur>(conteneur.begin()))>::value << std::endl;
+             std::cout << is_string<std::string>::value << std::endl;
+             std::cout << std::is_same < decltype(get_value<Conteneur>(conteneur.begin())) , std::string > :: value << std::endl;
+            //static_assert(is_string<decltype(get_value<Conteneur>(conteneur.begin()))>::value , "La version actuelle ne prend que des strings :/");
             check_can_add ();
             vec_option.push_back(option);
-            map_option_valide_value[option].insert  (   map_option_valide_value[option].begin(),
-                                                        conteneur.begin(),
-                                                        conteneur.end()
-                                                    );
+            map_option_valide_value[option] = {  conteneur.begin(),conteneur.end()   };
         }
 
         
@@ -357,6 +366,8 @@ class gestion_option
             if ( it != vec_args_named.end() ) 
             {
                 
+                // on vérifi que si c'etait une value a choix multiple on est bien dans un choix valide
+                check_liste_value(id,it->valeur);
                 // si oui il a la priorité 
                 return convert_to<T>(it->valeur);
             }
@@ -364,6 +375,8 @@ class gestion_option
             // si non, est ce qu'il est dans le fichier ? 
             auto it_fichier = std::find_if(vec_option_fichier.begin(), vec_option_fichier.end() , [&](auto paire) { return paire.first == id ;} );
             if ( it_fichier!= vec_option_fichier.end() ) {
+                // on vérifi que si c'etait une value a choix multiple on est bien dans un choix valide
+                check_liste_value(id,it_fichier->second);
                 return convert_to<T>(it_fichier->second);
             }
             
@@ -382,6 +395,7 @@ class gestion_option
             
             // si on arrive la c'est qu'on a trouvé donc on est safe,
             // j'ai du inverser la logique pour que le compilateur ne stress pas de ne pas avoir de retour;
+            check_liste_value(id,if_defaut->second);
             return convert_to<T>(if_defaut->second);
 		}
         

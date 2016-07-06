@@ -23,7 +23,7 @@ cmake_minimum_required(VERSION 2.6)
 	
 	# Release
 	if (CMAKE_BUILD_TYPE STREQUAL "")
-		set(CMAKE_BUILD_TYPE "Release")
+		set(CMAKE_BUILD_TYPE "Debug")
 	endif()
 	
 	# Release flags

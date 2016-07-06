@@ -1,5 +1,5 @@
-#ifndef OUITLS_HPP
-#define OUITLS_HPP
+#ifndef FONCTION_CONTENEUR_HPP
+#define FONCTION_CONTENEUR_HPP
 
 
 #include <iostream>
@@ -9,33 +9,86 @@
 #include <utility>
 #include <fstream>
 
-#include "fonction_string.hpp"
 #include "traits.hpp"
-
+namespace std 
+{
+    // TODO Comprendre pourquoi ça marche pas :/
+    // la recherche a coup de find if dans uen map demande la comparaison entre pair 
+    template <class Pair,
+              class Pair2, 
+              class  = std::enable_if_t < 
+                            std::is_same < 
+                                        std::decay_t < typename Pair::first_type > ,
+                                        std::decay_t < typename Pair2::first_type >
+                                         > ::value
+                                        >,
+              class  = std::enable_if_t < 
+                            std::is_same < 
+                                        std::decay_t < typename Pair::second_type > ,
+                                        std::decay_t < typename Pair2::second_type >
+                                         >::value
+                                        >
+              >
+    bool operator==(const Pair& p1, const Pair2&  p2 )
+    {
+        return p1.first == p2.first && p1.second == p2.second;
+    } 
+}
 namespace testSFML 
 {
 
-    // TODO : mettre à jours avec "get_value" quand je l'aurais fini 
+
+    template < 	bool is_map , 
+				class T>
+	struct get_value_s
+	{
+		auto& get_value (const T& ite) { return *ite; }
+		//const auto& get_value (const T& ite) { return *ite; }
+	};
+	
+	template <class T>
+	struct get_value_s < true, T >
+	{
+		auto& get_value (const T& ite) { return ite->second;; }
+		//const auto& get_value (const T& ite) { return ite->second;; }
+	};
+	
+	
+    template<class U , class T>
+	auto& get_value (const T& ite)
+	{
+        get_value_s<is_map<U>::value,T> gvs;
+        return gvs.get_value(ite);
+	}
+	
+	template<class U, class T>
+	auto& get_value (const T& ite,const U&)
+	{
+        get_value_s<is_map<U>::value,T> gvs;
+        return gvs.get_value(ite);
+	}
+
+	
+	
+
+    //
     // TODO : decltype de is_same devrait etre sur le get_value
     // la version ou U et T contiennent le meme type
-    template <	class T, class U > 
-    auto contain (const T& conteneur1,  const U& conteneur2) 
-         -> decltype ( enable_if_all_t <is_container, T, U >,
+    template <	class Conteneur1, class Conteneur2 > 
+    auto contain (const Conteneur1& conteneur1,  const Conteneur2& conteneur2) 
+         ->  last_t <  enable_if_all_t <is_container, Conteneur1, Conteneur2 >,
                        std::enable_if_t<
-                                          std::is_same < decltype ( *std::declval<T>().begin() ),
-                                                         decltype ( *std::declval<U>().begin() )
+                                          std::is_same < std::decay_t<decltype ( get_value<Conteneur1>(std::declval<Conteneur1>().begin() ))>,
+                                                         std::decay_t<decltype ( get_value<Conteneur2>(std::declval<Conteneur2>().begin() ))>
                                                         >::value
                                         >,
-                       bool)
+                       bool>
                        
     {
         if ( conteneur1.size() < conteneur2.size() ) { return false;}
         bool ok = true;
         
-        constexpr bool is_map_c1 = is_map<T>::value ;
-        constexpr bool is_map_c2 = is_map<U>::value ;
-        
-        for ( auto it = conteneur2.begin() ; it != conteneur2.end() && ok ; it++ )
+        for ( auto it = conteneur2.begin() ; it != conteneur2.end() && ok ; it = std::next(it) )
         {
             // je ne peux pas utiliser find_if + get_val car find_if passe la valeur
             // et pas l'itérateur 
@@ -50,66 +103,93 @@ namespace testSFML
                 }
                 else
                 {
-                    if ( get_value<is_map_c1>(it1) == get_value<is_map_c2>(it) )
+                    if ( get_value<Conteneur1>(it1) == get_value<Conteneur2>(it) )
                     {
-                        fini = false;
+                        fini = true;
                     }
                 }
+                it1 = std::next(it1);
             }          
         }
         return ok;
     }
     
-    template < class T,
+ 
+    template < class Conteneur1,
 			   class U> 
-	auto contain (const T& conteneur1 , const U& value)
-         -> decltype ( std::enable_if_t <is_container<T>::value>,
+	auto contain (const Conteneur1& conteneur1 , const U& value)
+         -> last_t <    std::enable_if_t <is_container<Conteneur1>::value>,
                        std::enable_if_t<
-                                          std::is_same < decltype ( *std::declval<T>().begin() ),
-                                                         U
+                                          std::is_same < std::decay_t<decltype (get_value<Conteneur1>(std::declval<Conteneur1>().begin()))>,
+                                                         std::decay_t<U>
                                                         >::value
                                         >,
-                       bool)
+                       bool>
 	{
-		static_assert(!is_map<T>::value, "je n'ai pas encore fait la version pour les map");
-		return std::find(conteneur1.begin(), conteneur1.end(), value) != conteneur1.end();
+        auto it1 = conteneur1.begin();
+        bool trouve = false;
+        while ( not trouve and (it1 != conteneur1.end()) ) 
+        {
+            if ( get_value<Conteneur1>(it1) == value )
+            {
+                trouve = true;
+            }
+            it1 = std::next(it1);
+        }      
+
+        return trouve;
+	}
+	
+	
+
+    
+
+	
+	// si on demande une map<key,val> et une pair<key,val> on fait une recherche
+	// normal :)
+	// le probleme est que le decay sur une pair ne match pas si la clée est const
+	// du coup je dois eclater la pair pour faire le decay
+	/*
+     *      cout << demangle (typeid(decltype (*m.begin())).name()) << endl;
+            cout << demangle ( typeid(std::decay_t<decltype (*m.begin())>).name())<< "   decay"  << endl;
+            cout << demangle ( typeid(decltype (std::pair<std::string,int>(std::string("d"),1))).name() ) << endl;
+     * 
+     *      std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int>
+            std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int>   decay
+            std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, int>
+
+     * 
+     */
+    
+
+	template < class Map,
+			   class U> 
+	auto contain (const Map& map1 , const U& value)
+         -> last_t <   std::enable_if_t <is_map<Map>::value>,
+                       std::enable_if_t<
+                                          std::is_same < std::decay_t<decltype (map1.begin()->first)>,
+                                                         std::decay_t<decltype (value.first)>
+                                                        >::value
+                                        >,
+                       std::enable_if_t<
+                                          std::is_same < std::decay_t<decltype (map1.begin()->second)>,
+                                                         std::decay_t<decltype (value.second)>
+                                                        >::value
+                                        >,
+                       bool>
+	{
+        return std::find(map1.begin(),map1.end(),value) != map1.end() ;
 	}
     
     
-    
-    
-    // TODO get_value sans doute a refaire, je pense pas que la version "non_const" soit utile
-    // j'arrive pas a voir quelle est la consteness de l'opérateur de déférancement 
-    
-    template < 	bool is_map , 
-				class T>
-	struct get_value_s
+    template<class Map, class K>
+    bool contain_key(const Map& map1 , const K& key)
 	{
-		auto& get_value (T& ite) { return *ite; }
-		const auto& get_value (const T& ite) { return *ite; }
-	};
-	
-	template <class T>
-	struct get_value_s < true, T >
-	{
-		auto& get_value (T& ite) { return ite->second;; }
-		const auto& get_value (const T& ite) { return ite->second;; }
-	};
-	
-	
-    template< bool is_map , class T>
-	auto& get_value (T& ite)
-	{
-			get_value_s<is_map,T> gvs;
-			return gvs.get_value(ite);
+        static_assert(is_map<Map>::value,"La recherche de clée ne peut se faire que dans une map");
+        return map1.find(key) != map1.end() ;
 	}
-	
-	template< bool is_map , class T>
-	const auto& get_value (const T& ite)
-	{
-			get_value_s<is_map,T> gvs;
-			return gvs.get_value(ite);
-	}
+    
+
 
 }
 #endif

@@ -7,7 +7,7 @@
 #include <SFML/Graphics.hpp>
 #include <typeinfo>
 
-#include "traits.hpp"
+#include "outils/traits.hpp"
 
 namespace testSFML {
 

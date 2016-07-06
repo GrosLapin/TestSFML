@@ -6,7 +6,7 @@
 #include <boost/math/distributions/normal.hpp> // for normal_distribution
 
 #include "traits.hpp"
-#include "fonctions_grapiphiques.hpp"
+
 
 #include "convertion.hpp"
 
@@ -336,12 +336,12 @@ namespace testSFML {
   double distance(const Point1& v, const Point2& w, const Point3& p) {
 		// Return minimum distance between line segment vw and point p
 		const double l2 = distance_carre(v, w);  // i.e. |w-v|^2 -  avoid a sqrt
-		if (l2 == 0.d) return distance(p, v);   // v == w case
+		if (l2 == 0.0) return distance(p, v);   // v == w case
 		// Consider the line extending the segment, parameterized as v + t (w - v).
 		// We find projection of point p onto the line. 
 		// It falls where t = [(p-v) . (w-v)] / |w-v|^2
 		// We clamp t from [0,1] to handle points outside the segment vw.
-		const double t = std::max(0.d, std::min(1.d, dot(p - v, w - v) / l2));
+		const double t = std::max(0.0, std::min(1.0, dot(p - v, w - v) / l2));
 		const default_point projection = v + t * (w - v);  // Projection falls on the segment
 		return distance(p, projection);
 	}

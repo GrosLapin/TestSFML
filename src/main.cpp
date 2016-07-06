@@ -4,8 +4,8 @@
 #include <typeinfo>
 #include "fonctions_grapiphiques.hpp"
 
-#include "fonctions_math.hpp"
-#include "gestion_option.hpp"
+#include "outils/fonctions_math.hpp"
+#include "outils/gestion_option.hpp"
 
 #include "route.hpp"
 #include "rond_point.hpp"
@@ -25,9 +25,14 @@ int main(int argc, char** argv)
     param.add("--nb-centre",3);
     param.add("--nb-maison",1000);
     
+    param.add("test",std::vector<std::string>({"a","b"}));
+    
     param.allow_raw_args(false);
     param.load_file("./exe.param");
 
+    std::cout << param.get_val("test") << std::endl;
+    
+    
     double ecart_type_centre = param.get_val<double>("--ecart-type-centre");
     double ecart_type_maison = param.get_val<double>("--ecart-type-maison");
     size_t nb_maison = param.get_val<size_t>("--nb-maison");
@@ -91,9 +96,7 @@ int main(int argc, char** argv)
 		map_test2[i] = centres[i].centre;
 	}
 	 create_routes(map_test,map_test2 );
-	 cout << is_map< map<int,sf::Vector2f> >::value << endl;
-	 constexpr bool is_map_v = is_map< map<int,sf::Vector2f> >::value ;
-	 cout << get_value<is_map_v>(map_test.begin());
+
 	 exit(5);
 	/* cout << typeid(sf::Vector2f).name() << endl;
 	 cout << typeid(decltype (get_value(map_test.begin()))).name() << endl;
