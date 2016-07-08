@@ -15,22 +15,23 @@ using std::cout;
 using std::endl;
 using std::map;
 using std::vector;
+
+template <class T>
+T& refTo (const T& t) { return t ; }
+
+
 int main(int argc, char** argv)
 {
 	
-
     gestion_option param(argc, argv);
     param.add("--ecart-type-centre","1");
     param.add("--ecart-type-maison","1");
     param.add("--nb-centre",3);
     param.add("--nb-maison",1000);
-    
-    param.add("test",std::vector<std::string>({"a","b"}));
+
     
     param.allow_raw_args(false);
     param.load_file("./exe.param");
-
-    std::cout << param.get_val("test") << std::endl;
     
     
     double ecart_type_centre = param.get_val<double>("--ecart-type-centre");
@@ -97,7 +98,7 @@ int main(int argc, char** argv)
 	}
 	 create_routes(map_test,map_test2 );
 
-	 exit(5);
+	
 	/* cout << typeid(sf::Vector2f).name() << endl;
 	 cout << typeid(decltype (get_value(map_test.begin()))).name() << endl;
 

@@ -341,16 +341,20 @@ class gestion_option
                  >
         inline void add (const std::string& option, const Conteneur& conteneur)
         {
-            using boost::core::demangle;
-            
-            std::cout << typeid(get_value<Conteneur>(conteneur.begin())).name()  << " " << demangle ( typeid(get_value<Conteneur>(conteneur.begin())).name() ) << std::endl;
-             std::cout << typeid(std::string).name() << " "<< demangle ( typeid(std::string).name() ) << std::endl;
-             std::cout << is_string<decltype(get_value<Conteneur>(conteneur.begin()))>::value << std::endl;
-             std::cout << is_string<std::string>::value << std::endl;
-             std::cout << std::is_same < decltype(get_value<Conteneur>(conteneur.begin())) , std::string > :: value << std::endl;
-            //static_assert(is_string<decltype(get_value<Conteneur>(conteneur.begin()))>::value , "La version actuelle ne prend que des strings :/");
+            static_assert(is_string<decltype(get_value<Conteneur>(conteneur.begin()))>::value , "La version actuelle ne prend que des strings :/");
             check_can_add ();
             vec_option.push_back(option);
+            map_option_valide_value[option] = {  conteneur.begin(),conteneur.end()   };
+        }
+        
+         template<   class Conteneur = std::vector<std::string>,
+                    class = std::enable_if_t<is_container<Conteneur>::value> 
+                 >
+        inline void add (const std::string& option, const std::string& value, const Conteneur& conteneur)
+        {
+            static_assert(is_string<decltype(get_value<Conteneur>(conteneur.begin()))>::value , "La version actuelle ne prend que des strings :/");
+            check_can_add ();
+            vec_option_default.push_back({option,value});
             map_option_valide_value[option] = {  conteneur.begin(),conteneur.end()   };
         }
 
