@@ -16,7 +16,7 @@ namespace testSFML {
 
 
 template <class Conteneur = std::vector<sf::Vector2f> >
-sf::VertexArray create_lines (Conteneur && points)
+sf::VertexArray create_lines (Conteneur && points, const sf::Color couleur =  sf::Color::White)
 {
 
     sf::VertexArray lines (sf::LinesStrip, points.size() );
@@ -26,8 +26,14 @@ sf::VertexArray create_lines (Conteneur && points)
     for (auto && point : points )
     {
         lines[cpt].position = sf::Vector2f(getX(point), getY(point));
+        
+         // la couleur 
+        lines[cpt].color = couleur;
+        
         cpt++;
     }
+    
+   
 
     return lines;
 

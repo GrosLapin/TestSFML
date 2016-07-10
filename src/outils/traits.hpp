@@ -114,13 +114,8 @@ struct is_string<   T,
 
 template <class T, class = void >
 struct is_map_impl : std::false_type {};
-/*
-template <class T, class U>
-struct is_map_impl< std::map<T,U> >  : std::true_type {};
 
-template <class T, class U>
-struct is_map_impl< std::unordered_map<T,U> >  : std::true_type {};
-*/
+
 template <class T >
 struct is_map_impl<     T,
 						last_t < 	std::enable_if_t< is_container<T>::value > ,
@@ -131,24 +126,6 @@ struct is_map_impl<     T,
 
 template<class T>
 using is_map = is_map_impl<std::decay_t<T>>;
-
-/*
- * TODO a regarde avec lénaic un jours
-template <template <class , class > class T, class = void >
-struct is_map : std::false_type {};
-
-
-template <template <class , class > class T, class Un, class Deux>
-struct is_map<   T,
-                typename void_if_valide<typename std::enable_if<
-                                                                std::is_same<T<Un,Deux>,std::map<Un,Deux>>::value ||
-                                                                std::is_same<T<Un,Deux>,std::unordered_map<Un,Deux>>::value 
-                                                                >::type
-                                        >::type
-            >  : std::true_type {};
-*/
-
-
 
 
 template <class T, class U = void, class V = void>
@@ -163,7 +140,13 @@ inline decltype(std::declval<T>().x) getX(T&& t)  { return t.x ;}
 template < class T>
 inline decltype(std::declval<T>().y) getY(T&& t)  { return t.y ;}
 
+template <class T>
+inline void setX(T& t, decltype(std::declval<T>().x) value )  { t.x = value ;}
 
+template < class T>
+inline void setY(T& t, decltype(std::declval<T>().y) value )  { t.y = value ;}
+
+// TODO upgrade ça avec le set
 template <class T>
 struct is_point<   T,
                     typename void_if_valide<decltype(getX(std::declval<T>()))>::type,

@@ -24,6 +24,17 @@ namespace testSFML {
 
     using default_point = sf::Vector2f;
 	
+    template <  class P1, 
+                class P2,
+                class = enable_if_all_t<is_point, P1, P2>
+             >
+    P1& assign (P1& p1, P2 p2)
+    {
+        setX(p1, getX(p2));
+        setY(p1, getY(p2));
+        return p1;
+    }
+    
 	template <class T, class U = void >
 	struct random_dispatch {
 		using distribution = typename std::uniform_int_distribution<T>;
@@ -162,6 +173,12 @@ namespace testSFML {
             // revois ça apres
 			return coef * getGaussianValue(repartition,distance(centre,pt) / 100 ) ;
         }
+        
+        centre_influence () = default;
+        centre_influence (Point p,normal n, double c = 100 ) : centre(p), repartition(n), coef(c) {}; 
+        using typeX = decltype(getX(centre));
+        using typeY = decltype(getY(centre));
+        centre_influence (typeX x, typeY y ) : centre (Point(x,y)) {};
     };
 	
 	/// IL faut changer le type de retour pour que ça soit generic

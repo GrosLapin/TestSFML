@@ -98,5 +98,76 @@ namespace testSFML
 		assert(une_route.size() >= 2 );
 		return angle_deg(*(une_route.end()-2),une_route.back(),std::forward<Point2>(point));
 	}
+	
+	
+	// TODO la version ici ne prend pas de "route" mais juste des points, a voir plus tard
+	// fonction qui essais de rendre la route moins "droite" en la cassant autant que possible avec
+	// les points disponibles
+	template < class PointRetour = default_point,
+               class point_route = default_point,
+               class ConteneurPoint = std::vector<default_point>
+             >
+	std::vector<PointRetour> update_route (std::vector<point_route> route, const ConteneurPoint& points, double distance_p, double angle)
+    {
+        static_assert(apply_on_all<is_container,ConteneurPoint>::value, " la fonctions prends deux conteneurs ");
+        static_assert(apply_on_all<is_point,point_route, decltype(*(points.begin())) > ::value , " les conteneurs attendent des points");
+        
+        assert( route.size() >= 2 );
+        
+    
+        
+        // decay_t + const & = ne sert a rien, mais je trouve ça plus lisible 
+        //using point_route = std::decay_t<decltype(*(route.begin()))>;
+        auto brise_ligne = [&] (auto it_debut)
+        {
+            const point_route& ref_debut  = *(it_debut);
+            const point_route& ref_fin    = *(std::next(it_debut));
+            
+            PointRetour retour_point;
+            double distance_max = -1;
+            bool exist = false; 
+            for ( const auto& p : points )
+            {
+                auto dist = distance(ref_debut,ref_fin,p);
+                if ( dist < distance_p  // est ce qu'on est a porté ?.
+                    && dist > distance_max // on veux le point le plus loins qui passe ce if, autant check au debut
+                    && angle_deg( ref_debut, ref_fin , p )  < angle //  est ce que les deux angles sont bon ? 
+                    && angle_deg( ref_fin , ref_debut, p )  < angle 
+                )
+                {
+                    distance_max = dist;
+                    // TODO : check si il y pas mieux :/
+                    // l'opérateur = doit etre dans la classe point 
+                    // mais c'est un concepte donc bon ...
+                    assign ( retour_point,  p );
+                    // retour.push_back(convert_to<PointRetour>(p));
+                    exist = true;
+                }
+            }
+            
+            return std::pair<bool,PointRetour> ( exist,retour_point );
+            
+        };
+        
+        size_t debut = 0;
+        while ( debut < route.size() -1 )
+        {
+            std::pair<bool,PointRetour> new_point = brise_ligne(route.begin() + debut);
+            if ( new_point.first )
+            {
+                route.insert( route.begin() + debut + 1,new_point.second);
+            }
+            else 
+            {
+                debut ++;
+            }
+            
+        }
+        
+        
+        return route;
+    
+        
+    }
 }
 #endif

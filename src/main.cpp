@@ -27,7 +27,7 @@ int main(int argc, char** argv)
     param.add("--ecart-type-centre","1");
     param.add("--ecart-type-maison","1");
     param.add("--nb-centre",3);
-    param.add("--nb-maison",1000);
+    param.add("--nb-maison",200);
 
     
     param.allow_raw_args(false);
@@ -50,12 +50,10 @@ int main(int argc, char** argv)
     
     std::vector<centre_influence<sf::Vector2f> > centres;
     std::vector <sf::CircleShape> cercles;
+    
     std::vector<sf::VertexArray> vec_lignes;
+    std::vector<sf::VertexArray> vec_lignes_brisee;
 	
-	// test 
-		std::vector<sf::Vector2f> test_vec = { {10,10}, {50, 60} };
-		vec_lignes.push_back(create_lines({test_vec[1],test_vec[0]}));
-	// fin test
     std::vector<route<sf::Vector2f>> routes;
     std::vector<sf::ConvexShape> poly;
         
@@ -166,28 +164,35 @@ int main(int argc, char** argv)
 
 				// = convert_to<sf::Vector2f> ( );
 				auto mousePos  = window.mapPixelToCoords( sf::Mouse::getPosition(window));
-				/*points.emplace_back(mousePos);
 				
-				if ( points.size() == 3 )
+                points.emplace_back(mousePos);
+				
+				if ( points.size() >= 2 )
 				{
+                    vec_lignes.clear();
 					vec_lignes.push_back(create_lines(points));
-					cout << angle_deg (points[0],points[1],points[2]) << endl;
 				}
-				if ( points.size() > 3 )
-				{
-					vec_lignes.erase(vec_lignes.end()-1);
-					points.clear();	
-				}*/
-				std:: cout <<mousePos << std::endl;
-				std::cout << distance(test_vec[0],test_vec[1],mousePos) << std::endl<< std::endl<< std::endl;
-
-
+    
+            }
+            if ((event.type == sf::Event::MouseButtonPressed) && (event.mouseButton.button == sf::Mouse::Right))
+            {
+                vec_lignes.erase(vec_lignes.end()-1);
+                points.clear();	
             }
 
             if ( event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Return )
 			{
-				vec_lignes.erase(vec_lignes.end()-1);
-				points.clear();
+                cout << "ici"<< endl; 
+                
+				if ( points.size() >= 2 ) 
+                {
+                    auto vec_points = update_route(points, centres, 100, 5 );
+                    if ( not vec_points.empty()) 
+                    {
+                        vec_lignes_brisee.push_back(create_lines(vec_points, sf::Color::Red));
+                    }
+                    
+                }
 			}
         }
 
@@ -197,6 +202,13 @@ int main(int argc, char** argv)
         {
             window.draw(lines);
         }
+        
+        for (const auto& lines : vec_lignes_brisee )
+        {
+            window.draw(lines);
+        }
+        
+        
         for (const auto& convex : poly)
         {
             window.draw(convex);
