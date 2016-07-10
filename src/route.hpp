@@ -107,7 +107,7 @@ namespace testSFML
                class point_route = default_point,
                class ConteneurPoint = std::vector<default_point>
              >
-	std::vector<PointRetour> update_route (std::vector<point_route> route, const ConteneurPoint& points, double distance_p, double angle)
+	std::vector<PointRetour> update_route (std::vector<point_route> route, const ConteneurPoint& points, double angle)
     {
         static_assert(apply_on_all<is_container,ConteneurPoint>::value, " la fonctions prends deux conteneurs ");
         static_assert(apply_on_all<is_point,point_route, decltype(*(points.begin())) > ::value , " les conteneurs attendent des points");
@@ -129,8 +129,7 @@ namespace testSFML
             for ( const auto& p : points )
             {
                 auto dist = distance(ref_debut,ref_fin,p);
-                if ( dist < distance_p  // est ce qu'on est a porté ?.
-                    && dist > distance_max // on veux le point le plus loins qui passe ce if, autant check au debut
+                if ( dist > distance_max // on veux le point le plus loins qui passe ce if, autant check au debut
                     && angle_deg( ref_debut, ref_fin , p )  < angle //  est ce que les deux angles sont bon ? 
                     && angle_deg( ref_fin , ref_debut, p )  < angle 
                 )
@@ -149,8 +148,8 @@ namespace testSFML
             
         };
         
-        size_t debut = 0;
-        while ( debut < route.size() -1 )
+       long int debut = 0;
+        while ( size_t(debut) < route.size() -1 )
         {
             std::pair<bool,PointRetour> new_point = brise_ligne(route.begin() + debut);
             if ( new_point.first )

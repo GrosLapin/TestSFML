@@ -28,6 +28,7 @@ int main(int argc, char** argv)
     param.add("--ecart-type-maison","1");
     param.add("--nb-centre",3);
     param.add("--nb-maison",200);
+    param.add("--max_degres_route",7.5);
 
     
     param.allow_raw_args(false);
@@ -36,9 +37,10 @@ int main(int argc, char** argv)
     
     double ecart_type_centre = param.get_val<double>("--ecart-type-centre");
     double ecart_type_maison = param.get_val<double>("--ecart-type-maison");
+    double max_degres_route = param.get_val<double>("--max_degres_route");
     size_t nb_maison = param.get_val<size_t>("--nb-maison");
     size_t nb_centre = param.get_val<size_t>("--nb-centre");
-
+    
     normal normal_centre(0,ecart_type_centre); // (default mean = zero, and standard deviation = unity)
     normal normal_maison(0,ecart_type_maison);
     
@@ -186,7 +188,7 @@ int main(int argc, char** argv)
                 
 				if ( points.size() >= 2 ) 
                 {
-                    auto vec_points = update_route(points, centres, 100, 5 );
+                    auto vec_points = update_route(points, centres, max_degres_route );
                     if ( not vec_points.empty()) 
                     {
                         vec_lignes_brisee.push_back(create_lines(vec_points, sf::Color::Red));
