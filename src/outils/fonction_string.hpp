@@ -19,8 +19,8 @@ namespace testSFML {
 	
 		template<
 			class T,
-			class V = typename std::enable_if< is_container<T>::value >::type,
-			class U = typename std::enable_if< !is_string<T>::value >::type
+			class =  std::enable_if_t< is_container<T>::value >,
+			class =  std::enable_if_t< !is_string<T>::value >
 		>
 		inline std::ostream & operator<< (std::ostream& out, const T& container)
 		{
@@ -35,7 +35,7 @@ namespace testSFML {
 
 
 		template<   class Point,
-					class V = typename std::enable_if< is_point<Point>::value >::type
+					class = std::enable_if_t< is_point<Point>::value >
 				>
 		inline std::ostream& operator<< (std::ostream& out, const Point& p)
 		{
