@@ -43,7 +43,9 @@ class gestion_option
             {
                 return o_id == id;
             }
-            IdValeur (std::string unId, std::string uneValeur) : id(unId),valeur(uneValeur) {}
+            
+            inline bool has_no_value () const { return valeur.empty(); } 
+            //IdValeur (std::string unId, std::string uneValeur) : id(unId),valeur(uneValeur) {}
         };
 
         const std::string separateur = "=";
@@ -110,7 +112,7 @@ class gestion_option
             // check des option 
             for (auto opt : vec_args_named ) {
 
-               auto if_defaut = std::find_if(vec_option_default.begin(), vec_option_default.end() , [&](auto paire) { return paire.first == opt.id ;} );
+               auto if_defaut = std::find_if(vec_option_default.begin(), vec_option_default.end() , [&](auto id_v) { return id_v.id == opt.id ;} );
                if ( if_defaut == vec_option_default.end() &&
                     std::find(vec_option.begin(),vec_option.end(),opt.id) == vec_option.end() )
                {
@@ -121,11 +123,11 @@ class gestion_option
             // check du fichier
             for (auto opt : vec_option_fichier ) {
 
-               auto if_defaut = std::find_if(vec_option_default.begin(), vec_option_default.end() , [&](auto paire) { return paire.first == opt.first ;} );
+               auto if_defaut = std::find_if(vec_option_default.begin(), vec_option_default.end() , [&](auto id_v) { return id_v.id == opt.id ;} );
                if ( if_defaut == vec_option_default.end() &&
-                    std::find(vec_option.begin(),vec_option.end(),opt.first) == vec_option.end() )
+                    std::find(vec_option.begin(),vec_option.end(),opt.id) == vec_option.end() )
                {
-                   erreur ("L'option \"" + opt.first + "\" n'est pas prévu par le programme.");
+                   erreur ("L'option \"" + opt.id + "\" n'est pas prévu par le programme.");
                }
             }
         }
@@ -150,17 +152,17 @@ class gestion_option
                 };
                 make_commentaire ("fichier auto generé");
                 make_commentaire (" vous pouvez l'utiliser en ajoutant l'option suivante a votre ligne de commande");
-                make_commentaire (" --load-file="+nomProgramme+".param");
+                make_commentaire (" --load-file"+separateur+"nomProgramme+".param");
                 make_commentaire ("");
                 make_commentaire ("Option par defaut du programme :");
                 for (const auto& pair : vec_option_default )
                 {
-                    flux << pair.first << "=" <<pair.second << std::endl;
+                    flux << pair.first << separateur <<pair.second << std::endl;
                 }
                 make_commentaire ("Option sans valeur par defaut ( à décomenter et compléter ):");
                 for (const auto& s : vec_option )
                 {
-                    make_commentaire(s+"=");
+                    make_commentaire(s+separateur);
                 }
                 std::cerr << "Generation du fichier " << nomProgramme+".param" << std::endl;
                 exit(5);
