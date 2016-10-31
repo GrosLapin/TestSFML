@@ -56,6 +56,8 @@ class gestion_option
         bool helpNeeded=false;
         // si l'utilisateur a fait --generate
         bool generate_file = false;
+        
+        
 		// on ne peut ajouter des params uniquement avant d'avoir commencer
 		// a lire les valeurs
 		bool can_add_param = true;
@@ -73,7 +75,7 @@ class gestion_option
         std::vector<IdValeur> vec_args_named;
         std::vector<std::string> vec_args_raw;
 
-        std::vector<std::pair<std::string,std::string>> vec_option_default, vec_option_fichier;
+        std::vector<IdValeur> vec_option_default, vec_option_fichier;
         std::vector<std::string> vec_option;
 
         /// TODO : le fair pour autre chose que des strings
