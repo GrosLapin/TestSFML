@@ -44,6 +44,8 @@ int main(int argc, char** argv)
     normal normal_centre(0,ecart_type_centre); // (default mean = zero, and standard deviation = unity)
     normal normal_maison(0,ecart_type_maison);
     
+
+    
     const int taille = 500;
     sf::RenderWindow window(sf::VideoMode(taille, taille), "SFML works!");
 	sf::View view1(window.getDefaultView());

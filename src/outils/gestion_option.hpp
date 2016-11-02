@@ -22,7 +22,6 @@
 
 
 
-
 namespace testSFML {
 
 class gestion_option
@@ -63,25 +62,37 @@ class gestion_option
         {
           std::string value;
           bool is_set = true;
+          bool prioritaire = true;
           value_ () = default; // je suis pas bien sur de savoir pourquoi j'ai besoin de ça, mais clairement j'en ai beosin
-          value_ (std::string v, bool ok = true ) : value(v), is_set(ok) {}
+          value_ (std::string v, bool ok = true , bool prio = true) : value(v), is_set(ok), prioritaire(prio) {}
         };
+        
         
         std::map<std::string,value_> options;
         std::vector<std::string> args_raw;
         
-        bool add_option_if_empty (std::string id, std::string value, bool set = true)
+        bool add_option_if_empty (std::string id, std::string value, bool set = true , bool prioritaire = true )
         {
+            // s'il existe mais qu'il est pas affecté
             if (  contain_key(options,id) && ! options[id].is_set )
             {
-                options[id] = value_(value,set);
+                options[id] = value_(value,set,prioritaire);
             }
+            
+            // s'il existe mais qu'il est affecté mais pas prioritaire
+            if (  contain_key(options,id) && not options[id].prioritaire )
+            {
+                options[id] = value_(value,set,prioritaire);
+            }
+            
+            // s'il existe pas 
             if (  ! contain_key(options,id) )
             {
-                options[id] = value_(value,set);
+                options[id] = value_(value,set,prioritaire);
             }
             return true;
         }
+        
 
         /// TODO : le fair pour autre chose que des strings
         //std::map < std::string , std::vector < std::string >> map_option_valide_value;
@@ -351,21 +362,21 @@ class gestion_option
         inline void add(const std::string& option, const T& defaultVal)
         {
 			check_can_add ();
-            add_option_if_empty(option,std::to_string(defaultVal));
+            add_option_if_empty(option,std::to_string(defaultVal),true,false);
         }
         
         inline void add(const std::string& option, const std::string& defaultVal)
         {
 			check_can_add ();
             std::cout << "add" << std::endl;
-            add_option_if_empty(option,defaultVal);
+            add_option_if_empty(option,defaultVal,true,false);
         }
         
 
         inline void add(const std::string& option)
         {
 			check_can_add ();
-            add_option_if_empty(option,"",false);
+            add_option_if_empty(option,"",false, false);
         }
         
         /*
