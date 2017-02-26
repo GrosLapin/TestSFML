@@ -1,4 +1,4 @@
-
+#include <utility>
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <typeinfo>
@@ -20,9 +20,34 @@ template <class T>
 T& refTo (const T& t) { return t ; }
 
 
+#include <fstream>
+
+
+
 int main(int argc, char** argv)
 {
 	
+    
+    vector<int> vint { 1,2,3,5,4,8};
+    vector<vector<double>> vvint  { {1,2} ,{} , {1,5,3,1}};
+    std::pair<int, int> p  {1,2};
+    cout << vint << endl;
+    cout << vvint << endl;
+    cout << p << endl;
+    
+    
+    cout << "ecriture dans un fichier" << endl;
+    
+    std::ofstream fichier("test");
+    if (fichier)
+        fichier << vvint << endl;
+    else
+        cout << "erreur"<<endl;
+    
+    
+    exit(5);
+    
+    
     gestion_option param(argc, argv);
     param.add("--ecart-type-centre","1");
     param.add("--ecart-type-maison","1");
@@ -98,14 +123,7 @@ int main(int argc, char** argv)
 	}
 	 create_routes(map_test,map_test2 );
 
-	
-	/* cout << typeid(sf::Vector2f).name() << endl;
-	 cout << typeid(decltype (get_value(map_test.begin()))).name() << endl;
 
-    cout << is_point<decltype (get_value(map_test.begin()) )>::value << endl;
-	cout.flush();
-	cout << ":" <<endl;
-    */
     
     
     // creation des routes pour verifier que ça marche bien

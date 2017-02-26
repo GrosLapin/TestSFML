@@ -11,39 +11,144 @@
 #include <regex>
 #include <type_traits>
 #include <cctype>
-
+#include <utility>
 
 #include "traits.hpp"
 
 namespace testSFML {
+    
+    
+template<class T, class U>
+inline std::ostream& operator<< (std::ostream& out, const std::pair<T,U>& p)
+{
+        out << "(" << p.first  << "," << p.second << ")" ;
+        return out;
+}
 	
-		template<
-			class T,
-			class =  std::enable_if_t< is_container<T>::value >,
-			class =  std::enable_if_t< !is_string<T>::value >
-		>
-		inline std::ostream & operator<< (std::ostream& out, const T& container)
-		{
-			for (const auto& val : container)
-			{
-			out << val << " " ;
-			}
-			return out;
-		}
+template<class T>
+struct affiche_imp
+{
+    static void affiche(std::ostream& out, const T& t)
+    {
+        for (const auto& elem : t)
+        {
+            out << elem << " (T)";
+        }
+    }
+};
+
+
+template<>
+struct affiche_imp<std::vector<int>>
+{
+    static void affiche(std::ostream& out, const std::vector<int>& t)
+    {
+        for (const auto& elem : t)
+        {
+            out << elem << " (int)";
+        }
+    }
+};
+
+template<class T>
+struct affiche_imp<std::vector<std::vector<T>>>
+{
+    static void affiche(std::ostream& out, const std::vector<std::vector<T>>& t)
+    {
+        size_t i = 0;
+        for (const auto& elem : t)
+        {
+            out <<"\t"<< elem ;
+            if ( i != t.size()-1 ){
+                out << "\n";
+            }
+            i++;
+        }
+    }
+};
+
+/*  Code faux mais interessant a garder
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+//Base
+template<class T>
+void affiche(std::ostream& out, const T& t)
+{
+    out << t << "! ";
+}
+ 
+ 
+// surchage : marche
+template<class T>
+void affiche(std::ostream& out, const std::vector<T>& t)
+{
+    out <<"\t" << t << "!! \n";
+}
+
+// spécitialisation pour int (ok)
+template<>
+void affiche<int>(std::ostream& out, const int& t)
+{
+    out << t << "! ";
+}
+
+// spé partielle: marche pas
+template<class T>
+void affiche<std::vector<T>>(std::ostream& out, const std::vector<T>& t)
+{
+    out << t << "! ";
+}
+
+// Overload, pas une spécification 
+// pourquoi je m'en sort pas avec de l'a spécification
+/// => la spécialisation est partielle car on dit "vecteur<T>" est pas vecteur<int>
+template<class T>
+void affiche(std::ostream& out, const std::vector<T>& t)
+{
+    out <<"\t" << t << "!! \n";
+}
+
+
+*/
+	
+
+    
+template<
+        class T,
+        class =  std::enable_if_t< is_container<T>::value >,
+        class =  std::enable_if_t< !is_string<T>::value >
+>
+inline std::ostream & operator<< (std::ostream& out, const T& container)
+{
+    /*
+        for (const auto& val : container)
+        {
+            affiche_imp<typename std::decay<decltype(val)>::type>::affiche(out,val);
+        }
+        return out;*/
+    
+    affiche_imp<T>::affiche(out,container);
+    return out;
+}
 
 
 
 
-		template<   class Point,
-					class = std::enable_if_t< is_point<Point>::value >
-				>
-		inline std::ostream& operator<< (std::ostream& out, const Point& p)
-		{
+template<   class Point,
+                        class = std::enable_if_t< is_point<Point>::value >
+                >
+inline std::ostream& operator<< (std::ostream& out, const Point& p)
+{
 
-			out << "(" << getX(p)  << "," << getY(p) << ")" ;
+        out << "(" << getX(p)  << "," << getY(p) << ")" ;
 
-			return out;
-		}
+        return out;
+}
 		
 		
 // la version ou  la limite est un string;
